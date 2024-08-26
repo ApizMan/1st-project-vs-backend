@@ -1,0 +1,39 @@
+{
+  "name": "backend_ccp_nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npx nodemon index.js",
+    "start": "node index.js",
+    "format": "npx prettier --check */**.js",
+    "format:fix": "npx prettier --write */**.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@lucia-auth/adapter-prisma": "^4.0.1",
+    "@prisma/client": "^5.14.0",
+    "axios": "^1.7.2",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "lucia": "^3.2.0",
+    "mysql2": "^3.9.7",
+    "nodemailer": "^6.9.13",
+    "sequelize": "^6.37.3",
+    "uuid": "^9.0.1",
+    "winston": "^3.13.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.1",
+    "prettier": "^3.2.5",
+    "prisma": "^5.14.0"
+  }
+}

@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Helpdesk {
+  id          String   @id @unique(map: "id")
+  pbtId       String   @map("pbt_id")
+  userId      String   @map("user_id")
+  description String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  pbt         Pbt      @relation(fields: [pbtId], references: [id])
+
+  @@map("helpdesk")
+}
+
+model Pbt {
+  id          String     @id @unique(map: "id")
+  name        String
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @map("updated_at")
+  helpdesk    Helpdesk[]
+
+  @@map("pbt")
+}
+
+model PlateNumber {
+  id          String   @id @unique(map: "id")
+  userId      String   @map("user_id")
+  plateNumber String   @map("plate_number")
+  isMain      Boolean  @map("is_main")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("plate_number")
+}
+
+model ReserveBay {
+  id                  String   @id @unique(map: "id")
+  userId              String   @map("user_id")
+  companyName         String?  @map("company_name")
+  companyRegistration String?  @map("company_registration")
+  businessType        String?  @map("business_type")
+  address1            String?
+  address2            String?
+  address3            String?
+  postcode            String?
+  city                String?
+  picFirstName        String?  @map("person_in_charge_first_name")
+  picLastName         String?  @map("person_in_charge_last_name")
+  phoneNumber         String?
+  email               String?
+  idNumber            String?  @map("id_number")
+  totalLotRequired    Int?     @map("total_lot_required")
+  reason              String?
+  lotNumber           String?  @map("lot_number")
+  location            String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @default(now()) @map("updated_at")
+  user                User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId], map: "user_id")
+  @@map("reserve_bay")
+}
+
+model Transaction {
+  id          String   @id @unique(map: "id")
+  userId      String   @map("user_id")
+  description String?
+  pbtId       String
+  amount      String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("transaction")
+}
+
+model WalletTransaction {
+  id        String   @id @unique
+  walletId  String   @map("wallet_id")
+  type      String
+  amount    Float
+  status    String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
+
+  @@map("wallet_transaction")
+}
+
+model User {
+  id           String        @id @unique(map: "id")
+  firstName    String?       @map("first_name")
+  secondName   String?       @map("second_name")
+  idNumber     String?       @map("id_number")
+  phoneNumber  String?       @map("phone_number")
+  email        String?
+  password     String?
+  address1     String?
+  address2     String?
+  address3     String?
+  postcode     Int?
+  city         String?
+  state        String?
+  wallet       Wallet?
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @map("updated_at")
+  helpdesks    Helpdesk[]
+  plateNumbers PlateNumber[]
+  reserveBays  ReserveBay[]
+  transactions Transaction[]
+
+  @@map("user")
+}
+
+model Wallet {
+  id                String              @id @unique(map: "id")
+  userId            String              @unique @map("user_id")
+  amount            Float               @default(0)
+  user              User?               @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  WalletTransaction WalletTransaction[]
+
+  @@map("wallet")
+}
+
+model PaymentTransaction {
+  id           String   @id @unique
+  userId       String   @map("user_id")
+  order_no     String?
+  order_amount Float?
+  order_status String?
+  store_id     String?
+  shift_id     String?
+  terminal_id  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+
+  @@map("payment_transaction")
+}
+
+model Token {
+  id           String   @id @default(uuid())
+  accessToken  String
+  refreshToken String
+  expiresIn    Int
+  type         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("token_management")
+}
