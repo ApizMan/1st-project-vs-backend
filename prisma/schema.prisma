@@ -44,28 +44,32 @@ model PlateNumber {
 }
 
 model ReserveBay {
-  id                  String   @id @unique(map: "id")
-  userId              String   @map("user_id")
-  companyName         String?  @map("company_name")
-  companyRegistration String?  @map("company_registration")
-  businessType        String?  @map("business_type")
-  address1            String?
-  address2            String?
-  address3            String?
-  postcode            String?
-  city                String?
-  picFirstName        String?  @map("person_in_charge_first_name")
-  picLastName         String?  @map("person_in_charge_last_name")
-  phoneNumber         String?
-  email               String?
-  idNumber            String?  @map("id_number")
-  totalLotRequired    Int?     @map("total_lot_required")
-  reason              String?
-  lotNumber           String?  @map("lot_number")
-  location            String?
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @default(now()) @map("updated_at")
-  user                User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                    String   @id @unique(map: "id")
+  userId                String   @map("user_id")
+  companyName           String?  @map("company_name")
+  companyRegistration   String?  @map("company_registration")
+  businessType          String?  @map("business_type")
+  address1              String?
+  address2              String?
+  address3              String?
+  postcode              String?
+  city                  String?
+  state                 String?
+  picFirstName          String?  @map("person_in_charge_first_name")
+  picLastName           String?  @map("person_in_charge_last_name")
+  phoneNumber           String?
+  email                 String?
+  idNumber              String?  @map("id_number")
+  totalLotRequired      Int?     @map("total_lot_required")
+  reason                String?
+  lotNumber             String?  @map("lot_number")
+  location              String?
+  designatedBayPicture  String?  @db.Text
+  registerNumberPicture String?  @db.Text
+  idCardPicture         String?  @db.Text
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @default(now()) @map("updated_at")
+  user                  User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([userId], map: "user_id")
   @@map("reserve_bay")
