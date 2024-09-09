@@ -21,12 +21,13 @@ model Helpdesk {
 }
 
 model Pbt {
-  id          String     @id @unique(map: "id")
+  id          String        @id @unique(map: "id")
   name        String
   description String?
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @default(now()) @map("updated_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @default(now()) @map("updated_at")
   helpdesk    Helpdesk[]
+  Transaction Transaction[]
 
   @@map("pbt")
 }
@@ -84,6 +85,7 @@ model Transaction {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @map("updated_at")
   user        User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  pbt         Pbt      @relation(fields: [pbtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("transaction")
 }
