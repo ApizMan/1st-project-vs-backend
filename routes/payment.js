@@ -192,6 +192,63 @@ paymentRouter.post("/refresh-token", async (req, res) => {
   }
 });
 
+paymentRouter.post("/transaction-details", async (req, res) => {
+  try {
+    // Fetch the most recent token from the database
+    const token = await client.token.findFirst({
+      where: {
+        type: "QR Pegepay",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!token) {
+      return res.status(404).json({ error: "No tokens found" });
+    }
+
+    // Set the tokens in the request object
+    const accessToken = token.accessToken;
+
+    // Use correct environment variable for the Pegepay API URL
+    const pegeypay_process_url = process.env.PEGEPAY_PROCESS_API;
+
+    try {
+      // Send the request to the Pegepay API
+      const response = await axios.post(pegeypay_process_url, req.body, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.status !== 200) {
+        console.error("API Response Error:", response.data);
+        return res.status(response.status).json({
+          error: "Failed to generate token & refresh code",
+          details: response.data,
+        });
+      }
+
+      // Return the successful response from the Pegepay API
+      return res.status(200).json(response.data);
+    } catch (error) {
+      console.error(
+        "Fetch Error:",
+        error.response ? error.response.data : error.message,
+      );
+      return res.status(500).json({
+        error: "Internal server error",
+        details: error.response ? error.response.data : null,
+      });
+    }
+  } catch (error) {
+    console.error("Database error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
   const { order_amount, store_id, terminal_id, shift_id } = req.body;
   console.log("Request Body:", req.body);
@@ -253,7 +310,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
     req.refreshToken = response.data.refresh_token;
 
     // Success: Send the response data back to the client
-    res.status(200).json(response.data);
+    res.status(200).json({ data: response.data, order: qr_body });
   } catch (error) {
     console.error(
       "Fetch Error:",
@@ -544,7 +601,7 @@ paymentRouter.post("/callbackUrl/pegeypay", async (req, res) => {
     }
   }
 
-  res.status(200).send("Webhook received");
+  res.status(200).send(payload.order_status);
 });
 
 function validatePayload(payload) {
