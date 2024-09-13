@@ -17,7 +17,7 @@ paymentfpxRouter.use(tokenMiddleware);
 let tokens = {
   accessToken: null,
   refreshToken: null,
-  expiresAt: null,
+  expiresAt: Math.floor(new Date().setDate(new Date().getDate() + 1) / 1000), // Set to tomorrow's timestamp
 };
 
 const TOKEN_EXPIRATION_TIME = 60 * 60 * 1000; // 2 minutes in milliseconds
