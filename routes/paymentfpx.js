@@ -82,7 +82,7 @@ paymentfpxRouter.post("/recordBill-token", async (req, res) => {
   const latestToken = await getLatestToken();
   console.log(latestToken); // Ensure this function is available
 
-  if (Date.now() >= latestToken.expiresAt) {
+  if (Date.now() >= latestToken.expiresIn) {
     console.log("Token expired, refreshing...");
     const refreshedTokens = await refreshTokenFPX();
     if (refreshedTokens) {
