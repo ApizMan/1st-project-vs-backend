@@ -78,6 +78,8 @@ paymentfpxRouter.post("/recordBill-token", async (req, res) => {
   const userId = req.user.userId;
   const { NetAmount } = req.body;
 
+  // return res.status(200).json(userId);
+
   // Fetch the latest token from the database
   let latestToken = await getLatestToken(); // Changed from const to let
   console.log(latestToken); // Ensure this function is available
@@ -492,14 +494,89 @@ paymentfpxRouter.post("/recordBill-reservebay", async (req, res) => {
 
 paymentfpxRouter.post("/callbackurl-fpx", async (req, res) => {
   const payload = req.body;
-  if (!validatePayload(payload)) {
+
+  // Validate payload structure first
+  if (!validatePayloadFPX(payload)) {
     return res.status(400).json({ error: "Invalid payload" });
   }
 
-  if (payload.order_status === "Transaction was Successful") {
-    await handlePaymentSuccess(payload);
+  // Use correct environment variable for the Pegepay API URL
+  const fpx_process_url = process.env.FPX_CALLBACKURL;
+
+  try {
+    // Fetch the most recent token from the database
+    const token = await client.token.findFirst({
+      where: {
+        type: "FPX SWITTLE",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!token) {
+      return res.status(404).json({ error: "No tokens found" });
+    }
+
+    // Set the tokens in the request object
+    const accessToken = token.accessToken;
+
+    // return res.status(200).json(accessToken);
+
+    // Prepare the payload for the API as per the provided document structure
+    const requestBody = {
+      ActivityTag: "CheckPaymentStatus",
+      LanguageCode: payload.LanguageCode || "EN", // Default to 'EN' if not provided
+      AppReleaseId: payload.VSAppReleaseId || "1", // Default value if not provided
+      GMTTimeDifference: payload.GMTTimeDifference || 8, // Default GMT+8 if not provided
+      PaymentTxnRef: payload.PaymentTxnRef || null, // Can be null
+      BillId: payload.BillId || 4405, // Default value if not provided
+      BillReference: payload.BillReference || null, // Can be null
+    };
+
+    // return res.status(200).json(requestBody);
+
+    // Send the request to the Pegepay API
+    const response = await axios.post(fpx_process_url, requestBody, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`, // Pass the token here
+      },
+    });
+
+    // Handle non-200 response
+    if (response.status !== 200) {
+      console.error("API Response Error:", response.data);
+      return res.status(response.status).json({
+        error: "Failed to send to FPX",
+        details: response.data,
+      });
+    }
+
+    // If API returns success, handle the response
+    if (payload.order_status === "Transaction was Successful") {
+      await handlePaymentSuccess(payload);
+    }
+
+    // Return the successful response from the Pegepay API
+    return res.status(200).json(response.data);
+  } catch (error) {
+    console.error(
+      "Fetch Error:",
+      error.response ? error.response.data : error.message,
+    );
+    return res.status(500).json({
+      error: "Internal server error",
+      details: error.response ? error.response.data : null,
+    });
   }
 });
+
+// Payload validation function
+function validatePayloadFPX(payload) {
+  // Add necessary validation logic here
+  return payload.BillId && payload.LanguageCode && payload.AppReleaseId;
+}
 
 paymentfpxRouter.post("/payment-status", async (req, res) => {
   const { BillReference } = req.body;

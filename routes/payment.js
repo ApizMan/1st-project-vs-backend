@@ -550,7 +550,7 @@ paymentRouter.post("/callbackUrl/pegeypay", async (req, res) => {
       console.log("Transaction updated:", updatedTransaction);
 
       // Check if shift_id is "Token"
-      if (payload.shift_id === "Token") {
+      if (payload.shift_id === req.user.email) {
         // Get walletId from the Wallet model using userId
         const wallet = await client.wallet.findUnique({
           where: { userId: req.user.userId },
@@ -603,7 +603,7 @@ paymentRouter.post("/callbackUrl/pegeypay", async (req, res) => {
     }
   }
 
-  res.status(200).send(payload.order_status);
+  res.status(200).send(payload);
 });
 
 function validatePayload(payload) {
