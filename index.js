@@ -15,6 +15,7 @@ import client from "./utils/db.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import compoundRouter from "./routes/compound.js";
 import paymentfpxRouter from "./routes/paymentfpx.js";
+import monthlyPassRoute from "./routes/monthlyPass.js";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -40,6 +41,7 @@ app.use("/payment", paymentRouter);
 app.use("/helpdesk", helpDeskRouter);
 app.use("/compound", compoundRouter);
 app.use("/paymentfpx", paymentfpxRouter);
+app.use("/monthlyPass", monthlyPassRoute);
 
 const startupTime = new Date();
 

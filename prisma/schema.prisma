@@ -124,6 +124,7 @@ model User {
   plateNumbers PlateNumber[]
   reserveBays  ReserveBay[]
   transactions Transaction[]
+  MonthlyPass  MonthlyPass[]
 
   @@map("user")
 }
@@ -165,4 +166,20 @@ model Token {
   @@map("token_management")
 }
 
+model MonthlyPass {
+  id          String  @id @unique(map: "id")
+  userId      String  @map("user_id")
+  plateNumber String  @default("No Plate Number") @map("plate_number")
+  pbt         String  @default("No PBT") @map("pbt")
+  location    String  @default("No Location")
+  amount      Decimal @default(0)
+  duration    String  @default("0 Month")
 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId], map: "user_id")
+  @@map("monthly_pass")
+}
