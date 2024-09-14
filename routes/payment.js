@@ -211,6 +211,8 @@ paymentRouter.post("/transaction-details", async (req, res) => {
     // Set the tokens in the request object
     const accessToken = token.accessToken;
 
+    // return res.status(200).json(accessToken);
+
     // Use correct environment variable for the Pegepay API URL
     const pegeypay_process_url = process.env.PEGEPAY_PROCESS_API;
 
@@ -253,7 +255,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
   const { order_amount, store_id, terminal_id, shift_id } = req.body;
   console.log("Request Body:", req.body);
 
-  const { accessToken, refreshToken } = req;
+  const { accessToken } = req;
 
   console.log("Access Token:", accessToken);
 

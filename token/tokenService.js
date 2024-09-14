@@ -57,7 +57,7 @@ export async function saveTokens(accessToken, refreshToken) {
 
 export async function getLatestToken() {
   try {
-    const latestToken = await prisma.token.findFirst({
+    const latestToken = await prisma.token.findFirstOrThrow({
       where: {
         type: "FPX SWITTLE",
       },

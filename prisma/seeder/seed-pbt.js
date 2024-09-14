@@ -6,24 +6,24 @@ async function main() {
   await prisma.pbt.create({
     data: {
       id: uuidv4(),
-      name: "Majlis Bandaraya Kuala Terengganu",
-      description: "Majlis Bandaraya Kuala Terengganu",
+      name: "PBT Kuala Terengganu",
+      description: "PBT Kuala Terengganu",
     },
   });
 
   await prisma.pbt.create({
     data: {
       id: uuidv4(),
-      name: "Majlis Bandaraya Kuantan",
-      description: "Majlis Bandaraya Kuantan",
+      name: "PBT Kuantan",
+      description: "PBT Kuantan",
     },
   });
 
   await prisma.pbt.create({
     data: {
       id: uuidv4(),
-      name: "Majlis Daerah Machang",
-      description: "Majlis Daerah Machang",
+      name: "PBT Machang",
+      description: "PBT Machang",
     },
   });
 

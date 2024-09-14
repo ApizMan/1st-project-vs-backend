@@ -79,14 +79,14 @@ paymentfpxRouter.post("/recordBill-token", async (req, res) => {
   const { NetAmount } = req.body;
 
   // Fetch the latest token from the database
-  const latestToken = await getLatestToken();
+  let latestToken = await getLatestToken(); // Changed from const to let
   console.log(latestToken); // Ensure this function is available
 
   if (Date.now() >= latestToken.expiresIn) {
     console.log("Token expired, refreshing...");
     const refreshedTokens = await refreshTokenFPX();
     if (refreshedTokens) {
-      latestToken = await getLatestToken(); // Fetch the latest token after refresh
+      latestToken = await getLatestToken(); // Reassign the latest token
     } else {
       return res.status(500).json({ error: "Failed to refresh token" });
     }
