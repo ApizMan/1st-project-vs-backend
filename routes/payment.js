@@ -256,8 +256,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
     req.body;
   console.log("Request Body:", req.body);
 
-  const { accessToken } = req;
-
+  let { accessToken } = req; // Current access token
   console.log("Access Token:", accessToken);
 
   function generateRandomId() {
@@ -285,10 +284,9 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
     ],
   };
 
-  console.log("Request Body:", qr_body);
+  console.log("QR Body:", qr_body);
 
   const paymentApi = process.env.PAYMENT_API;
-
   console.log("Payment API URL:", paymentApi);
 
   try {
@@ -301,7 +299,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
 
     console.log("API Response:", response.data);
 
-    if (!response.status === 200) {
+    if (response.status !== 200) {
       console.error("API Response Error:", response.data);
       return res.status(response.status).json({
         error: "Failed to generate QR code",
@@ -311,6 +309,36 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
 
     req.accessToken = response.data.access_token;
     req.refreshToken = response.data.refresh_token;
+
+    // Set an interval to refresh the token every 10 minutes
+    const refreshInterval = 10 * 60 * 1000; // 10 minutes in milliseconds
+    setTimeout(async () => {
+      try {
+        const refreshResponse = await axios.post(
+          `${process.env.BASE_URL}:${process.env.PORT}/payment/refresh-token`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Use the current token
+            },
+          },
+        );
+
+        if (refreshResponse.status === 200) {
+          console.log("Token refreshed successfully:", refreshResponse.data);
+
+          // Update access token for future requests
+          accessToken = refreshResponse.data.access_token;
+        } else {
+          console.error("Failed to refresh token:", refreshResponse.data);
+        }
+      } catch (error) {
+        console.error(
+          "Refresh Token Fetch Error:",
+          error.response ? error.response.data : error.message,
+        );
+      }
+    }, refreshInterval);
 
     // Success: Send the response data back to the client
     res.status(200).json({ data: response.data, order: qr_body });
