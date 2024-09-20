@@ -109,7 +109,7 @@ model User {
   secondName   String?       @map("second_name")
   idNumber     String?       @map("id_number")
   phoneNumber  String?       @map("phone_number")
-  email        String?
+  email        String?       @unique
   password     String?
   address1     String?
   address2     String?
@@ -117,6 +117,8 @@ model User {
   postcode     Int?
   city         String?
   state        String?
+  otp          String? // To store OTP
+  otpExpiresAt DateTime? // To store OTP expiration time
   wallet       Wallet?
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @default(now()) @map("updated_at")

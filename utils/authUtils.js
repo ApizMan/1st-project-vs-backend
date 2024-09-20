@@ -1,5 +1,6 @@
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
 
 const secret = process.env.SECRET;
 
@@ -45,4 +46,29 @@ export const comparePasswords = (plainPassword, hashedPassword) => {
 export const hashPassword = (password) => {
   const salt = bcrypt.genSaltSync(10);
   return bcrypt.hashSync(password, salt);
+};
+
+export const sendEmail = async (to, subject, text) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER, // Use environment variable for email
+      pass: process.env.EMAIL_PASS, // Use environment variable for app password
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER, // Use the same email address for the sender
+    to,
+    subject,
+    text,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
 };

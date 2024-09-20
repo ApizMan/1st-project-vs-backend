@@ -16,6 +16,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import compoundRouter from "./routes/compound.js";
 import paymentfpxRouter from "./routes/paymentfpx.js";
 import monthlyPassRoute from "./routes/monthlyPass.js";
+import forgetPasswordRouter from "./routes/forgetPassword.js";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -42,6 +43,7 @@ app.use("/helpdesk", helpDeskRouter);
 app.use("/compound", compoundRouter);
 app.use("/paymentfpx", paymentfpxRouter);
 app.use("/monthlyPass", monthlyPassRoute);
+app.use("/forgot-password", forgetPasswordRouter);
 
 const startupTime = new Date();
 
