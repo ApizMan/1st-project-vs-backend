@@ -91,14 +91,15 @@ model Transaction {
 }
 
 model WalletTransaction {
-  id        String   @id @unique
-  walletId  String   @map("wallet_id")
+  id        String    @id @unique
+  walletId  String    @map("wallet_id")
   type      String
   amount    Float
   status    String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
-  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @map("updated_at")
+  wallet    Wallet    @relation(fields: [walletId], references: [id])
+  Parking   Parking[]
 
   @@map("wallet_transaction")
 }
@@ -127,6 +128,7 @@ model User {
   reserveBays  ReserveBay[]
   transactions Transaction[]
   MonthlyPass  MonthlyPass[]
+  Parking      Parking[]
 
   @@map("user")
 }
@@ -184,4 +186,22 @@ model MonthlyPass {
 
   @@index([userId], map: "user_id")
   @@map("monthly_pass")
+}
+
+model Parking {
+  id                  String @id @unique(map: "id")
+  userId              String @map("user_id")
+  walletTransactionId String @map("wallet_transaction_id")
+  plateNumber         String @default("No Plate Number") @map("plate_number")
+  pbt                 String @default("No PBT") @map("pbt")
+  location            String @default("No Location")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  walletTransaction WalletTransaction @relation(fields: [walletTransactionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId], map: "user_id")
+  @@map("parking")
 }
