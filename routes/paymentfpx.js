@@ -526,11 +526,11 @@ paymentfpxRouter.post("/callbackurl-fpx", async (req, res) => {
     // Prepare the payload for the API as per the provided document structure
     const requestBody = {
       ActivityTag: "CheckPaymentStatus",
-      LanguageCode: payload.LanguageCode || "EN", // Default to 'EN' if not provided
-      AppReleaseId: payload.VSAppReleaseId || "1", // Default value if not provided
+      LanguageCode: payload.LanguageCode || "en", // Default to 'EN' if not provided
+      AppReleaseId: payload.VSAppReleaseId || 34, // Default value if not provided
       GMTTimeDifference: payload.GMTTimeDifference || 8, // Default GMT+8 if not provided
       PaymentTxnRef: payload.PaymentTxnRef || null, // Can be null
-      BillId: payload.BillId || 4405, // Default value if not provided
+      BillId: payload.BillId, // Default value if not provided
       BillReference: payload.BillReference || null, // Can be null
     };
 
