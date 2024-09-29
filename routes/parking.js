@@ -5,12 +5,26 @@ import { v4 as uuidv4 } from "uuid";
 import client from "../utils/db.js";
 
 const parkingRouter = express.Router();
+
+parkingRouter.get("/public", async (req, res) => {
+  try {
+    const allParking = await client.parking.findMany();
+    res.status(200).json(allParking);
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send(error);
+  }
+});
+
 parkingRouter.use(tokenMiddleware);
 
 parkingRouter
   .get("/", async (req, res) => {
+    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
     try {
-      const allParking = await client.parking.findMany();
+      const allParking = await client.parking.findMany({
+        where: { userId },
+      });
       res.status(200).json(allParking);
     } catch (error) {
       logger.error(error);
