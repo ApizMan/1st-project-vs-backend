@@ -10,7 +10,8 @@
     "format": "npx prettier --check */**.js",
     "format:fix": "npx prettier --write */**.js",
     "seed:pbt": "node prisma/seeder/seed-pbt.js",
-    "seed:user": "node prisma/seeder/seed-user.js"
+    "seed:user": "node prisma/seeder/seed-user.js",
+    "seed:parking": "node prisma/seeder/seed-parking.js"
   },
   "keywords": [],
   "author": "",
