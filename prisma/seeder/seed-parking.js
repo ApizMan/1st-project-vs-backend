@@ -3,6 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
+function getRandomDate(start, end) {
+  return new Date(
+    start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+  );
+}
+
 async function main() {
   // Fetch all users
   const users = await prisma.user.findMany({
@@ -64,14 +70,21 @@ async function main() {
     // Select a random PBT
     const randomPbt = pbts[Math.floor(Math.random() * pbts.length)];
 
+    // Generate a random createdAt date between 2022 and 2024
+    const createdAt = getRandomDate(
+      new Date(2022, 0, 1),
+      new Date(2024, 11, 31),
+    );
+
     await prisma.parking.create({
       data: {
-        id: uuidv4(), // Add the unique ID here
+        id: uuidv4(), // Unique parking ID
         userId: randomUser.id, // Use a valid user ID
         walletTransactionId: randomWalletTransaction.id, // Randomly assign a wallet transaction
         plateNumber: `PLT${Math.floor(Math.random() * 10000)}`, // Random plate number
         pbt: randomPbt.id, // Use a random PBT ID
         location: randomPbt.name, // Use the name of the PBT as the location
+        createdAt: createdAt, // Use the random createdAt date
       },
     });
   }
