@@ -10,7 +10,7 @@ async function hashPassword(password) {
   return await bcrypt.hash(password, saltRounds);
 }
 
-async function main() {
+async function createUser() {
   // Hash the password before storing it
   const hashedPassword = await hashPassword("password");
 
@@ -18,11 +18,11 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       id: uuidv4(),
-      firstName: "test",
-      secondName: "admin",
+      firstName: "Test",
+      secondName: `Admin${Math.floor(Math.random() * 1000)}`,
       idNumber: "1234567890",
       phoneNumber: "555-555-5555",
-      email: "testadmin@example.com",
+      email: `testadmin${Math.floor(Math.random() * 1000)}@example.com`, // Generate a unique email
       password: hashedPassword, // Use the hashed password here
       address1: "123 Main St",
       address2: "Apt 4B",
@@ -58,8 +58,16 @@ async function main() {
   });
 
   console.log("User created:", user);
+}
 
-  // Optionally, create more users, wallets, or plate numbers here
+async function main() {
+  const userPromises = [];
+
+  for (let i = 0; i < 10; i++) {
+    userPromises.push(createUser());
+  }
+
+  await Promise.all(userPromises);
 }
 
 main()

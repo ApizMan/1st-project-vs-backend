@@ -47,7 +47,7 @@ async function main() {
       data: {
         id: uuidv4(), // Unique wallet transaction ID
         walletId: walletIds[Math.floor(Math.random() * walletIds.length)], // Randomly select a wallet ID
-        type: Math.random() > 0.5 ? "INCREMENT" : "DECREMENT", // Randomly select type
+        type: "DECREMENT",
         amount: Math.floor(Math.random() * 1000) + 1, // Random amount between 1 and 1000
         status: "completed", // Assuming all transactions are completed
       },
