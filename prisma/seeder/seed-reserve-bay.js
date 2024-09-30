@@ -3,6 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
+function getRandomDate(start, end) {
+  return new Date(
+    start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+  );
+}
+
 // Sample data for business types
 const businessTypes = [
   "Klinik Swasta",
@@ -44,6 +50,12 @@ async function main() {
       totalLots[Math.floor(Math.random() * totalLots.length)];
     const totalLotRequiredValue = totalLotsMapping[totalLotRequiredKey];
 
+    // Generate a random createdAt date between 2022 and 2024
+    const createdAt = getRandomDate(
+      new Date(2022, 0, 1),
+      new Date(2024, 11, 31),
+    );
+
     const reserveBay = await prisma.reserveBay.create({
       data: {
         id: uuidv4(),
@@ -69,6 +81,7 @@ async function main() {
         designatedBayPicture: "http://example.com/designated-bay.jpg",
         registerNumberPicture: "http://example.com/register-number.jpg",
         idCardPicture: "http://example.com/id-card.jpg",
+        createdAt: createdAt, // Use the random createdAt date
       },
     });
 
