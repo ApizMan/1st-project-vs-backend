@@ -10,6 +10,17 @@ import logger from "../utils/logger.js";
 import client from "../utils/db.js";
 
 const authRouter = express.Router();
+
+authRouter.get("/users", async (req, res) => {
+  try {
+    const users = await client.user.findMany();
+    res.status(200).json(users);
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send(error);
+  }
+});
+
 authRouter.use(tokenMiddleware);
 
 authRouter

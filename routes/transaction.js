@@ -3,6 +3,17 @@ import client from "../utils/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { tokenMiddleware } from "../utils/authUtils.js";
 const transactionRouter = express.Router();
+
+transactionRouter.get("/allTransactionWallet", async (req, res) => {
+  try {
+    const users = await client.walletTransaction.findMany();
+    res.status(200).json(users);
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send(error);
+  }
+});
+
 transactionRouter.use(tokenMiddleware);
 
 transactionRouter
