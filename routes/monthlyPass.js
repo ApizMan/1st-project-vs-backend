@@ -5,12 +5,26 @@ import { v4 as uuidv4 } from "uuid";
 import client from "../utils/db.js";
 
 const monthlyPassRouter = express.Router();
+
+monthlyPassRouter.get("/public", async (req, res) => {
+  try {
+    const monthlyPass = await client.monthlyPass.findMany();
+    res.status(200).json(monthlyPass);
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send(error);
+  }
+});
+
 monthlyPassRouter.use(tokenMiddleware);
 
 monthlyPassRouter
   .get("/", async (req, res) => {
+    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
     try {
-      const monthlyPass = await client.monthlyPass.findMany();
+      const monthlyPass = await client.monthlyPass.findMany({
+        where: { userId },
+      });
       res.status(200).json(monthlyPass);
     } catch (error) {
       logger.error(error);

@@ -17,7 +17,7 @@ async function main() {
 
   // Fetch all PBTs
   const pbts = await prisma.pbt.findMany({
-    select: { id: true, name: true }, // Fetching both id and name for the PBT
+    select: { id: true, name: true, description: true }, // Fetching both id and name for the PBT
   });
 
   // Create wallets only if they don't already exist
@@ -47,7 +47,7 @@ async function main() {
       data: {
         id: uuidv4(), // Unique wallet transaction ID
         walletId: walletIds[Math.floor(Math.random() * walletIds.length)], // Randomly select a wallet ID
-        type: Math.random() > 0.5 ? "credit" : "debit", // Randomly select type
+        type: Math.random() > 0.5 ? "INCREMENT" : "DECREMENT", // Randomly select type
         amount: Math.floor(Math.random() * 1000) + 1, // Random amount between 1 and 1000
         status: "completed", // Assuming all transactions are completed
       },
@@ -82,8 +82,8 @@ async function main() {
         userId: randomUser.id, // Use a valid user ID
         walletTransactionId: randomWalletTransaction.id, // Randomly assign a wallet transaction
         plateNumber: `PLT${Math.floor(Math.random() * 10000)}`, // Random plate number
-        pbt: randomPbt.id, // Use a random PBT ID
-        location: randomPbt.name, // Use the name of the PBT as the location
+        pbt: randomPbt.name, // Use a random PBT name
+        location: randomPbt.description, // Use the description of the PBT as the location
         createdAt: createdAt, // Use the random createdAt date
       },
     });

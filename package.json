@@ -11,14 +11,15 @@
     "format:fix": "npx prettier --write */**.js",
     "seed:pbt": "node prisma/seeder/seed-pbt.js",
     "seed:user": "node prisma/seeder/seed-user.js",
-    "seed:parking": "node prisma/seeder/seed-parking.js"
+    "seed:parking": "node prisma/seeder/seed-parking.js",
+    "seed:monthlyPass": "node prisma/seeder/seed-monthly-pass.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@lucia-auth/adapter-prisma": "^4.0.1",
-    "@prisma/client": "^5.19.1",
+    "@prisma/client": "^5.20.0",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
@@ -39,6 +40,6 @@
   "devDependencies": {
     "nodemon": "^3.1.1",
     "prettier": "^3.2.5",
-    "prisma": "^5.19.1"
+    "prisma": "^5.20.0"
   }
 }
