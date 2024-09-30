@@ -12,7 +12,8 @@
     "seed:pbt": "node prisma/seeder/seed-pbt.js",
     "seed:user": "node prisma/seeder/seed-user.js",
     "seed:parking": "node prisma/seeder/seed-parking.js",
-    "seed:monthlyPass": "node prisma/seeder/seed-monthly-pass.js"
+    "seed:monthlyPass": "node prisma/seeder/seed-monthly-pass.js",
+    "seed:reserveBay": "node prisma/seeder/seed-reserve-bay.js"
   },
   "keywords": [],
   "author": "",
