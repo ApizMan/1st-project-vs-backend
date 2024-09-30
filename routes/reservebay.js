@@ -5,6 +5,17 @@ import client from "../utils/db.js";
 import logger from "../utils/logger.js";
 
 const reservebayRouter = express.Router();
+
+reservebayRouter.get("/public", async (req, res) => {
+  try {
+    const reserveBays = await client.reserveBay.findMany();
+    res.status(200).json(reserveBays);
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send(error);
+  }
+});
+
 reservebayRouter.use(tokenMiddleware);
 
 reservebayRouter
