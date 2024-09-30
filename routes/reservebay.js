@@ -20,8 +20,11 @@ reservebayRouter.use(tokenMiddleware);
 
 reservebayRouter
   .get("/", async (req, res) => {
+    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
     try {
-      const reserveBays = await client.reserveBay.findMany();
+      const reserveBays = await client.reserveBay.findMany({
+        where: { userId },
+      });
       res.status(200).json(reserveBays);
     } catch (error) {
       logger.error(error);
