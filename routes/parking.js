@@ -16,6 +16,18 @@ parkingRouter
       return res.status(500).send(error);
     }
   })
+  .get("/single/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      const singleParking = await client.parking.findUnique({
+        where: { id },
+      });
+      res.status(200).json(singleParking);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
+  })
   .put("/edit/:id", async (req, res) => {
     const { id } = req.params;
     const { plateNumber, pbt, location } = req.body; // Data to update
