@@ -30,7 +30,7 @@ parkingRouter
   })
   .put("/edit/:id", async (req, res) => {
     const { id } = req.params;
-    const { plateNumber, pbt, location } = req.body; // Data to update
+    const { userId, plateNumber, pbt, location } = req.body; // Data to update
 
     try {
       // Check if the parking exists and belongs to the user
@@ -48,6 +48,7 @@ parkingRouter
       const updatedParking = await client.parking.update({
         where: { id },
         data: {
+          userId: userId || existingParking.userId,
           plateNumber: plateNumber || existingParking.plateNumber,
           pbt: pbt || existingParking.pbt,
           location: location || existingParking.location,
