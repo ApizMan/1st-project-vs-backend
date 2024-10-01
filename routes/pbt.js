@@ -6,7 +6,7 @@ import logger from "../utils/logger.js";
 
 const pbtRouter = express.Router();
 
-pbtRouter.get("/", async (req, res) => {
+pbtRouter.get("/public", async (req, res) => {
   try {
     const pbt = await client.pbt.findMany();
     res.status(200).json(pbt);
