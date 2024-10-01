@@ -15,7 +15,7 @@ async function main() {
     data: {
       id: uuidv4(),
       name: "PBT Kuantan",
-      description: "Kuantan",
+      description: "Pahang",
     },
   });
 
@@ -23,7 +23,7 @@ async function main() {
     data: {
       id: uuidv4(),
       name: "PBT Machang",
-      description: "Machang",
+      description: "Kelantan",
     },
   });
 

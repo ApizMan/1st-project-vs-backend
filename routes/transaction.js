@@ -4,15 +4,46 @@ import { v4 as uuidv4 } from "uuid";
 import { tokenMiddleware } from "../utils/authUtils.js";
 const transactionRouter = express.Router();
 
-transactionRouter.get("/allTransactionWallet", async (req, res) => {
-  try {
-    const users = await client.walletTransaction.findMany();
-    res.status(200).json(users);
-  } catch (error) {
-    logger.error(error);
-    return res.status(500).send(error);
-  }
-});
+transactionRouter
+  .get("/allTransactionWallet", async (req, res) => {
+    try {
+      const users = await client.walletTransaction.findMany();
+      res.status(200).json(users);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
+  })
+  .put("/edit/:id", async (req, res) => {
+    const { id } = req.params;
+    const { amount, status } = req.body; // Data to update
+
+    try {
+      // Check if the transaction exists and belongs to the user
+      const existingTransaction = await client.walletTransaction.findUnique({
+        where: { id },
+      });
+
+      if (!existingTransaction) {
+        return res.status(404).json({
+          error: "Transaction not found.",
+        });
+      }
+
+      // Update the Parking entry
+      const updatedTransaction = await client.walletTransaction.update({
+        where: { id },
+        data: {
+          amount: amount || existingTransaction.amount,
+          status: status || existingTransaction.status,
+        },
+      });
+
+      res.status(200).json({ status: "success", data: updatedTransaction });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
 
 transactionRouter.use(tokenMiddleware);
 

@@ -6,58 +6,14 @@ import client from "../utils/db.js";
 
 const parkingRouter = express.Router();
 
-parkingRouter.get("/public", async (req, res) => {
-  try {
-    const allParking = await client.parking.findMany();
-    res.status(200).json(allParking);
-  } catch (error) {
-    logger.error(error);
-    return res.status(500).send(error);
-  }
-});
-
-parkingRouter.use(tokenMiddleware);
-
 parkingRouter
-  .get("/", async (req, res) => {
-    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
+  .get("/public", async (req, res) => {
     try {
-      const allParking = await client.parking.findMany({
-        where: { userId },
-      });
+      const allParking = await client.parking.findMany();
       res.status(200).json(allParking);
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error);
-    }
-  })
-  .post("/create", async (req, res) => {
-    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
-    const { walletTransactionId, plateNumber, pbt, location } = req.body; // Destructure relevant data from req.body
-    const id = uuidv4(); // Generate unique ID
-
-    try {
-      // Create a new Parking entry
-      const newParking = await client.parking.create({
-        data: {
-          id,
-          plateNumber,
-          pbt,
-          location,
-          // Connect existing user
-          user: {
-            connect: { id: userId }, // Use userId to connect the user
-          },
-          // Connect existing walletTransaction
-          walletTransaction: {
-            connect: { id: walletTransactionId }, // Use walletTransactionId to connect the WalletTransaction
-          },
-        },
-      });
-
-      res.status(201).json({ status: "success", data: newParking });
-    } catch (error) {
-      res.status(400).json({ error: error.message });
     }
   })
   .put("/edit/:id", async (req, res) => {
@@ -114,6 +70,51 @@ parkingRouter
         status: "success",
         message: "Parking deleted successfully.",
       });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+parkingRouter.use(tokenMiddleware);
+
+parkingRouter
+  .get("/", async (req, res) => {
+    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
+    try {
+      const allParking = await client.parking.findMany({
+        where: { userId },
+      });
+      res.status(200).json(allParking);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
+  })
+  .post("/create", async (req, res) => {
+    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
+    const { walletTransactionId, plateNumber, pbt, location } = req.body; // Destructure relevant data from req.body
+    const id = uuidv4(); // Generate unique ID
+
+    try {
+      // Create a new Parking entry
+      const newParking = await client.parking.create({
+        data: {
+          id,
+          plateNumber,
+          pbt,
+          location,
+          // Connect existing user
+          user: {
+            connect: { id: userId }, // Use userId to connect the user
+          },
+          // Connect existing walletTransaction
+          walletTransaction: {
+            connect: { id: walletTransactionId }, // Use walletTransactionId to connect the WalletTransaction
+          },
+        },
+      });
+
+      res.status(201).json({ status: "success", data: newParking });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
