@@ -12,6 +12,12 @@ import {
 } from "../token/tokenService.js";
 
 const paymentfpxRouter = express.Router();
+
+paymentfpxRouter.post("/public", async (req, res) => {
+  fpxLogin();
+  res.send("fpxLogin success");
+});
+
 paymentfpxRouter.use(tokenMiddleware);
 
 let tokens = {
