@@ -29,7 +29,8 @@ monthlyPassRouter
     }
   })
   .post("/public/create", async (req, res) => {
-    const { userId, plateNumber, pbt, amount, duration, location } = req.body; // Destructure relevant data from req.body
+    const { userId, plateNumber, pbt, amount, duration, location, createdAt } =
+      req.body; // Destructure relevant data from req.body
     const id = uuidv4(); // Generate unique ID for MonthlyPass
 
     try {
@@ -43,6 +44,7 @@ monthlyPassRouter
           location: location,
           amount: amount || 0, // Default to 0 if not provided
           duration: duration || "0 Month", // Default to "0 Month" if not provided
+          createdAt: createdAt || new Date(),
         },
       });
 
