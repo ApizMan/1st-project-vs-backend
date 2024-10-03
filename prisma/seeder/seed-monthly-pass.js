@@ -3,6 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
+function getRandomDate(start, end) {
+  return new Date(
+    start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+  );
+}
+
 // Function to generate a random Malaysian-style plate number, e.g., "WVL 1234"
 function generateRandomPlateNumber() {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -44,6 +50,11 @@ async function main() {
     const pbt = pbts[index % pbts.length]; // Reuse PBTs cyclically
     const packageDetails =
       monthlyPassPackages[index % monthlyPassPackages.length]; // Cycle through monthly pass packages
+    // Generate a random createdAt date between 2022 and 2024
+    const createdAt = getRandomDate(
+      new Date(2022, 0, 1),
+      new Date(2024, 11, 31),
+    );
 
     return {
       id: uuidv4(),
@@ -53,6 +64,7 @@ async function main() {
       location: pbt.description, // Use PBT description as `location`
       amount: packageDetails.amount, // Use amount from package details
       duration: packageDetails.duration, // Use duration from package details
+      createdAt: createdAt, // Use the random createdAt date
     };
   });
 
