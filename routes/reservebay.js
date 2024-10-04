@@ -197,6 +197,35 @@ reservebayRouter
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
+  })
+  .put("/edit/status/:id", async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body; // Data to update
+
+    try {
+      // Check if the monthly pass exists and belongs to the user
+      const existingReserveBay = await client.reserveBay.findUnique({
+        where: { id },
+      });
+
+      if (!existingReserveBay) {
+        return res.status(404).json({
+          error: "Reserve Bay not found.",
+        });
+      }
+
+      // Update the monthly pass entry
+      const updatedReserveBay = await client.reserveBay.update({
+        where: { id },
+        data: {
+          status: status || existingReserveBay.status,
+        },
+      });
+
+      res.status(200).json({ status: "success", data: updatedReserveBay });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
   });
 
 reservebayRouter.use(tokenMiddleware);

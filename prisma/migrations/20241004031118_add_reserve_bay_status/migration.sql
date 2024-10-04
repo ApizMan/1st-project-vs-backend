@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `reserve_bay` ADD COLUMN `status` VARCHAR(191) NOT NULL DEFAULT 'PENDING';
