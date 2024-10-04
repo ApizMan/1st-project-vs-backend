@@ -98,7 +98,7 @@ monthlyPassRouter
 
       if (!existingMonthlyPass) {
         return res.status(404).json({
-          error: "MOnthly Pass not found.",
+          error: "Monthly Pass not found.",
         });
       }
 

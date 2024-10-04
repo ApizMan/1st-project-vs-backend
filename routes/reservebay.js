@@ -6,15 +6,198 @@ import logger from "../utils/logger.js";
 
 const reservebayRouter = express.Router();
 
-reservebayRouter.get("/public", async (req, res) => {
-  try {
-    const reserveBays = await client.reserveBay.findMany();
-    res.status(200).json(reserveBays);
-  } catch (error) {
-    logger.error(error);
-    return res.status(500).send(error);
-  }
-});
+reservebayRouter
+  .get("/public", async (req, res) => {
+    try {
+      const reserveBays = await client.reserveBay.findMany();
+      res.status(200).json(reserveBays);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
+  })
+  .get("/single/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      const singleReserveBay = await client.reserveBay.findUnique({
+        where: { id },
+      });
+      res.status(200).json(singleReserveBay);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
+  })
+  .post("/public/create", async (req, res) => {
+    const {
+      userId,
+      companyName,
+      companyRegistration,
+      businessType,
+      address1,
+      address2,
+      address3,
+      postcode,
+      city,
+      state,
+      picFirstName,
+      picLastName,
+      phoneNumber,
+      email,
+      idNumber,
+      totalLotRequired,
+      reason,
+      lotNumber,
+      location,
+      designatedBayPicture,
+      registerNumberPicture,
+      idCardPicture,
+      createdAt,
+    } = req.body; // Destructure relevant data from req.body
+    const id = uuidv4(); // Generate unique ID for Reserve Bay
+
+    try {
+      // Create a new Reserve Bay
+      const newReserveBay = await client.reserveBay.create({
+        data: {
+          id,
+          userId: userId,
+          companyName: companyName,
+          companyRegistration: companyRegistration,
+          businessType: businessType,
+          address1: address1,
+          address2: address2,
+          address3: address3,
+          postcode: postcode,
+          city: city,
+          state: state,
+          picFirstName: picFirstName,
+          picLastName: picLastName,
+          phoneNumber: phoneNumber,
+          email: email,
+          idNumber: idNumber,
+          totalLotRequired: totalLotRequired,
+          reason: reason,
+          lotNumber: lotNumber,
+          location: location,
+          designatedBayPicture: designatedBayPicture,
+          registerNumberPicture: registerNumberPicture,
+          idCardPicture: idCardPicture,
+          createdAt: createdAt || new Date(),
+        },
+      });
+
+      res.status(201).json({ status: "success", data: newReserveBay });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  })
+  .put("/edit/:id", async (req, res) => {
+    const { id } = req.params;
+    const {
+      userId,
+      companyName,
+      companyRegistration,
+      businessType,
+      address1,
+      address2,
+      address3,
+      postcode,
+      city,
+      state,
+      picFirstName,
+      picLastName,
+      phoneNumber,
+      email,
+      idNumber,
+      totalLotRequired,
+      reason,
+      lotNumber,
+      location,
+      designatedBayPicture,
+      registerNumberPicture,
+      idCardPicture,
+      createdAt,
+    } = req.body; // Data to update
+
+    try {
+      // Check if the monthly pass exists and belongs to the user
+      const existingReserveBay = await client.reserveBay.findUnique({
+        where: { id },
+      });
+
+      if (!existingReserveBay) {
+        return res.status(404).json({
+          error: "Reserve Bay not found.",
+        });
+      }
+
+      // Update the monthly pass entry
+      const updatedReserveBay = await client.reserveBay.update({
+        where: { id },
+        data: {
+          userId: userId || existingReserveBay.userId,
+          companyName: companyName || existingReserveBay.companyName,
+          companyRegistration:
+            companyRegistration || existingReserveBay.companyRegistration,
+          businessType: businessType || existingReserveBay.businessType,
+          address1: address1 || existingReserveBay.address1,
+          address2: address2 || existingReserveBay.address2,
+          address3: address3 || existingReserveBay.address3,
+          postcode: postcode || existingReserveBay.postcode,
+          city: city || existingReserveBay.city,
+          state: state || existingReserveBay.state,
+          picFirstName: picFirstName || existingReserveBay.picFirstName,
+          picLastName: picLastName || existingReserveBay.picLastName,
+          phoneNumber: phoneNumber || existingReserveBay.phoneNumber,
+          email: email || existingReserveBay.email,
+          idNumber: idNumber || existingReserveBay.idNumber,
+          totalLotRequired:
+            totalLotRequired || existingReserveBay.totalLotRequired,
+          reason: reason || existingReserveBay.reason,
+          lotNumber: lotNumber || existingReserveBay.lotNumber,
+          location: location || existingReserveBay.location,
+          designatedBayPicture:
+            designatedBayPicture || existingReserveBay.designatedBayPicture,
+          registerNumberPicture:
+            registerNumberPicture || existingReserveBay.registerNumberPicture,
+          idCardPicture: idCardPicture || existingReserveBay.idCardPicture,
+          createdAt: createdAt || existingReserveBay.createdAt,
+        },
+      });
+
+      res.status(200).json({ status: "success", data: updatedReserveBay });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  })
+  .delete("/delete/:id", async (req, res) => {
+    const { id } = req.params; // The Reserve Bay ID from the URL parameter
+    try {
+      // Check if the reserve bay entry exists and belongs to the user
+      const existingReserveBay = await client.reserveBay.findUnique({
+        where: { id },
+      });
+
+      if (!existingReserveBay) {
+        return res.status(404).json({
+          error: "Reserve Bay not found.",
+        });
+      }
+
+      // Delete the monthly pass entry
+      await client.reserveBay.delete({
+        where: { id },
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: "Reserve Bay deleted successfully.",
+      });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
 
 reservebayRouter.use(tokenMiddleware);
 
