@@ -65,9 +65,9 @@ model ReserveBay {
   reason                String?
   lotNumber             String?  @map("lot_number")
   location              String?
-  designatedBayPicture  String?  @db.Text
-  registerNumberPicture String?  @db.Text
-  idCardPicture         String?  @db.Text
+  designatedBayPicture  String?
+  registerNumberPicture String?
+  idCardPicture         String?
   status                String   @default("PENDING")
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @default(now()) @map("updated_at")

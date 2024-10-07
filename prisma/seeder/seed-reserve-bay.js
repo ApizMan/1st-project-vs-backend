@@ -26,9 +26,9 @@ const totalLots = ["3 Bulan: RM 300", "6 Bulan: RM 600", "12 Bulan: RM 1,200"];
 
 // Mapping of total lots to integers
 const totalLotsMapping = {
-  "3 Bulan: RM 300": 3, // Store the number of lots as integers
-  "6 Bulan: RM 600": 6,
-  "12 Bulan: RM 1,200": 12,
+  "3 Bulan: RM 300": 300, // Store the number of lots as integers
+  "6 Bulan: RM 600": 600,
+  "12 Bulan: RM 1,200": 1200,
 };
 
 async function main() {
@@ -78,9 +78,11 @@ async function main() {
         reason: "For business parking needs",
         lotNumber: `Lot-${i + 1}`,
         location: `Location-${i + 1}`,
-        designatedBayPicture: "http://example.com/designated-bay.jpg",
-        registerNumberPicture: "http://example.com/register-number.jpg",
-        idCardPicture: "http://example.com/id-card.jpg",
+        designatedBayPicture:
+          "https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg",
+        registerNumberPicture:
+          "https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg",
+        idCardPicture: "https://pdfobject.com/pdf/sample.pdf",
         createdAt: createdAt, // Use the random createdAt date
       },
     });
