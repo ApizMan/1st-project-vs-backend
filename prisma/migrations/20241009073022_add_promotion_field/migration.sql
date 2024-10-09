@@ -1,11 +1,5 @@
-/*
-  Warnings:
-
-  - Added the required column `promotion_id` to the `monthly_pass` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- AlterTable
-ALTER TABLE `monthly_pass` ADD COLUMN `promotion_id` VARCHAR(191) NOT NULL;
+ALTER TABLE `monthly_pass` ADD COLUMN `promotion_id` VARCHAR(191) NULL;
 
 -- AlterTable
 ALTER TABLE `reserve_bay` MODIFY `designatedBayPicture` VARCHAR(191) NULL,
@@ -13,7 +7,7 @@ ALTER TABLE `reserve_bay` MODIFY `designatedBayPicture` VARCHAR(191) NULL,
     MODIFY `registerNumberPicture` VARCHAR(191) NULL;
 
 -- CreateTable
-CREATE TABLE `Promotion` (
+CREATE TABLE `promotion` (
     `id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL DEFAULT 'No Title',
     `description` VARCHAR(191) NULL,
@@ -25,6 +19,3 @@ CREATE TABLE `Promotion` (
     UNIQUE INDEX `id`(`id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- AddForeignKey
-ALTER TABLE `monthly_pass` ADD CONSTRAINT `monthly_pass_promotion_id_fkey` FOREIGN KEY (`promotion_id`) REFERENCES `Promotion`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
