@@ -18,6 +18,7 @@ import paymentfpxRouter from "./routes/paymentfpx.js";
 import monthlyPassRoute from "./routes/monthlyPass.js";
 import forgetPasswordRouter from "./routes/forgetPassword.js";
 import parkingRouter from "./routes/parking.js";
+import promotionRouter from "./routes/promotions.js";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -46,6 +47,7 @@ app.use("/paymentfpx", paymentfpxRouter);
 app.use("/monthlyPass", monthlyPassRoute);
 app.use("/forgot-password", forgetPasswordRouter);
 app.use("/parking", parkingRouter);
+app.use("/promotion", promotionRouter);
 
 const startupTime = new Date();
 
