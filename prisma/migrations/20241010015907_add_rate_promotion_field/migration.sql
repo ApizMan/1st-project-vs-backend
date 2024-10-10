@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `promotion` ADD COLUMN `rate` DECIMAL(65, 30) NOT NULL DEFAULT 0;

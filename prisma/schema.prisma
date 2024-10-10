@@ -212,6 +212,8 @@ model Promotion {
   id          String   @id @unique(map: "id")
   title       String   @default("No Title")
   description String?
+  type        String?
+  rate        Decimal  @default(0)
   date        DateTime @default(now())
   image       String?
 

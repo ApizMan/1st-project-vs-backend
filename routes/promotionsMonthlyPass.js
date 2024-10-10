@@ -29,7 +29,7 @@ promotionRouter
     }
   })
   .post("/public/create", async (req, res) => {
-    const { title, description, date, image, createdAt } = req.body; // Destructure relevant data from req.body
+    const { title, description, rate, date, image, createdAt } = req.body; // Destructure relevant data from req.body
     const id = uuidv4(); // Generate unique ID for MonthlyPass
 
     try {
@@ -39,6 +39,8 @@ promotionRouter
           id,
           title: title,
           description: description,
+          type: "MonthlyPass",
+          rate: rate,
           date: date,
           image: image,
           createdAt: createdAt || new Date(),
@@ -52,7 +54,7 @@ promotionRouter
   })
   .put("/edit/:id", async (req, res) => {
     const { id } = req.params;
-    const { title, description, date, image, createdAt } = req.body; // Data to update
+    const { title, description, rate, date, image, createdAt } = req.body; // Data to update
 
     try {
       // Check if the monthly pass exists and belongs to the user
@@ -72,6 +74,7 @@ promotionRouter
         data: {
           title: title || existingPromotion.title,
           description: description || existingPromotion.description,
+          rate: rate || existingPromotion.rate,
           date: date || existingPromotion.date,
           image: image || existingPromotion.image,
           createdAt: createdAt || existingPromotion.createdAt,
