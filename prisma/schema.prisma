@@ -209,12 +209,13 @@ model Parking {
 }
 
 model Promotion {
-  id          String   @id @unique(map: "id")
-  title       String   @default("No Title")
+  id          String    @id @unique(map: "id")
+  title       String    @default("No Title")
   description String?
   type        String?
-  rate        Decimal  @default(0)
-  date        DateTime @default(now())
+  rate        Decimal   @default(0)
+  date        DateTime  @default(now())
+  expiredDate DateTime?
   image       String?
 
   createdAt DateTime @default(now()) @map("created_at")
