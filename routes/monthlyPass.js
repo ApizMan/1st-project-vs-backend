@@ -29,8 +29,16 @@ monthlyPassRouter
     }
   })
   .post("/public/create", async (req, res) => {
-    const { userId, plateNumber, pbt, amount, duration, location, createdAt } =
-      req.body; // Destructure relevant data from req.body
+    const {
+      userId,
+      promotionId,
+      plateNumber,
+      pbt,
+      amount,
+      duration,
+      location,
+      createdAt,
+    } = req.body; // Destructure relevant data from req.body
     const id = uuidv4(); // Generate unique ID for MonthlyPass
 
     try {
@@ -39,6 +47,7 @@ monthlyPassRouter
         data: {
           id,
           userId: userId,
+          promotionId: promotionId ?? null,
           plateNumber: plateNumber,
           pbt: pbt,
           location: location,
@@ -55,7 +64,15 @@ monthlyPassRouter
   })
   .put("/edit/:id", async (req, res) => {
     const { id } = req.params;
-    const { userId, plateNumber, pbt, location, amount, duration } = req.body; // Data to update
+    const {
+      userId,
+      promotionId,
+      plateNumber,
+      pbt,
+      location,
+      amount,
+      duration,
+    } = req.body; // Data to update
 
     try {
       // Check if the monthly pass exists and belongs to the user
@@ -74,6 +91,7 @@ monthlyPassRouter
         where: { id },
         data: {
           userId: userId || existingMonthlyPass.userId,
+          promotionId: promotionId || existingMonthlyPass.promotionId,
           plateNumber: plateNumber || existingMonthlyPass.plateNumber,
           pbt: pbt || existingMonthlyPass.pbt,
           location: location || existingMonthlyPass.location,
