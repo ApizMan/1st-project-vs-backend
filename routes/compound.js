@@ -9,6 +9,132 @@ import { Builder } from "xml2js";
 const compoundRouter = express.Router();
 compoundRouter.use(tokenMiddleware);
 
+compoundRouter.post("/display", async (req, res) => {
+  const userId = req.user.userId;
+
+  const agencyId = process.env.COMPOUND_AGENCY_ID;
+  const agencyKey = process.env.COMPOUND_AGENCY_KEY;
+
+  try {
+    // Query the plate numbers from the database using Prisma
+    const plates = await client.plateNumber.findMany({
+      where: {
+        userId: userId,
+        isMain: true,
+      },
+      select: {
+        plateNumber: true,
+      },
+    });
+
+    // Check if no plate numbers were found
+    if (plates.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No plate numbers found for this user" });
+    }
+
+    // Extract plate numbers into an array
+    const plateNumbers = plates.map((plate) => plate.plateNumber);
+
+    // Build the SOAP request XML
+    const builder = new Builder();
+    const soapRequestJson = {
+      "s:Envelope": {
+        $: {
+          "xmlns:s": "http://schemas.xmlsoap.org/soap/envelope/",
+          "xmlns:a": "http://schemas.xmlsoap.org/ws/2004/08/addressing",
+        },
+        "s:Header": {
+          RequestCode: "REQ_11",
+          AgencyID: agencyId,
+          AgencyKey: agencyKey,
+        },
+        "s:Body": {
+          Request: {
+            OffenderIDNo: null,
+            VehicleRegistrationNumbers: {
+              VehicleRegistrationNumber: plateNumbers,
+            },
+            NoticeNo: null,
+          },
+        },
+      },
+    };
+
+    const soapRequest = builder.buildObject(soapRequestJson);
+    const soapHeader = process.env.COMPOUND_SOAP;
+
+    // Send SOAP request to the service using axios
+    const response = await axios.post(process.env.COMPOUND_API, soapRequest, {
+      headers: {
+        "Content-Type": "text/xml",
+        SOAPAction: soapHeader,
+      },
+    });
+
+    // Parse the SOAP XML response to JSON
+    xml2js.parseString(
+      response.data,
+      { explicitArray: false },
+      (err, result) => {
+        if (err) {
+          return res.status(500).json({
+            message: "Error parsing XML response",
+            error: err.message,
+          });
+        }
+
+        // Extract relevant data from the parsed JSON
+        const envelope = result["s:Envelope"];
+        const body = envelope["s:Body"];
+        const responseContent = body?.Response;
+
+        // If there's no response data
+        if (!responseContent) {
+          return res
+            .status(404)
+            .json({ message: "No data found in the response" });
+        }
+
+        // Extract the Summonses information
+        let summonses = responseContent.Summonses?.Summons || [];
+
+        // Check if summonses is an object and convert it to an array
+        if (!Array.isArray(summonses)) {
+          summonses = [summonses];
+        }
+
+        // Build JSON response to return
+        const jsonResponse = {
+          actionCode: responseContent.ActionCode || null,
+          responseCode: responseContent.ResponseCode || null,
+          responseMessage: responseContent.ResponseMessage || null,
+          summonses: summonses.map((summons) => ({
+            noticeNo: summons.NoticeNo || null,
+            vehicleRegistrationNo: summons.VehicleRegistrationNo || null,
+            offenceAct: summons.OffenceAct || null,
+            offenceSection: summons.OffenceSection || null,
+            offenceDescription: summons.OffenceDescription || null,
+            offenceLocation: summons.OffenceLocation || null,
+            offenceDate: summons.OffenceDate || null,
+            noticeStatus: summons.NoticeStatus || null,
+            amount: summons.Amount || null,
+          })),
+        };
+
+        // Return the response in JSON format
+        return res.status(200).json({ success: true, data: jsonResponse });
+      },
+    );
+  } catch (error) {
+    console.error("Error during SOAP request:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
 compoundRouter.post("/search", async (req, res) => {
   const { OffenderIDNo, VehicleRegistrationNumber, NoticeNo } = req.body;
 
@@ -112,6 +238,7 @@ compoundRouter.post("/search", async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 });
+
 compoundRouter.post("/payCompound", async (req, res) => {
   const {
     OwnerIDNo,
