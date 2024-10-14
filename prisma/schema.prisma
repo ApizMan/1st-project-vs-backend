@@ -130,6 +130,7 @@ model User {
   transactions Transaction[]
   MonthlyPass  MonthlyPass[]
   Parking      Parking[]
+  Compound     Compound[]
 
   @@map("user")
 }
@@ -222,4 +223,29 @@ model Promotion {
   updatedAt DateTime @default(now()) @map("updated_at")
 
   @@map("promotion")
+}
+
+model Compound {
+  id                        String   @id @unique(map: "id")
+  userId                    String   @map("user_id")
+  OwnerIdNo                 String?  @default("111111111111")
+  OwnerCategoryId           String?  @default("1")
+  VehicleRegistrationNumber String   @default("ABC123")
+  NoticeNo                  String   @default("AA11300001")
+  ReceiptNo                 String   @default("123456")
+  PaymentTransactionType    Int?     @default(0)
+  PaymentDate               DateTime @default(now())
+  PaidAmount                Decimal  @default(0)
+  ChannelType               String?
+  PaymentStatus             String?
+  PaymentMode               String?
+  PaymentLocation           String   @default("STRADA80")
+  Notes                     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("compound")
 }
