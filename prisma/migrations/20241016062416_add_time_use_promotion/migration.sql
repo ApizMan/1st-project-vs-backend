@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `promotion` ADD COLUMN `timeUse` INTEGER NOT NULL DEFAULT 0;
