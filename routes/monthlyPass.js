@@ -152,7 +152,8 @@ monthlyPassRouter
 
   .post("/create", async (req, res) => {
     const userId = req.user.userId; // Assuming this is obtained via authentication middleware
-    const { plateNumber, pbt, amount, duration, location } = req.body; // Destructure relevant data from req.body
+    const { plateNumber, promotionId, pbt, amount, duration, location } =
+      req.body; // Destructure relevant data from req.body
     const id = uuidv4(); // Generate unique ID for MonthlyPass
 
     try {
@@ -161,6 +162,7 @@ monthlyPassRouter
         data: {
           id,
           userId,
+          promotionId: promotionId ?? null,
           plateNumber,
           pbt,
           location,
