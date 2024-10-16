@@ -38,119 +38,123 @@ compoundRouter.post("/display", async (req, res) => {
 
   const agencyId = process.env.COMPOUND_AGENCY_ID;
   const agencyKey = process.env.COMPOUND_AGENCY_KEY;
+  const soapHeader = process.env.COMPOUND_SOAP;
 
   try {
-    // Query the plate numbers from the database using Prisma
+    // Query all plate numbers from the database using Prisma
     const plates = await client.plateNumber.findMany({
       where: {
         userId: userId,
-        isMain: true,
       },
       select: {
         plateNumber: true,
       },
     });
 
-    // Check if no plate numbers were found
     if (plates.length === 0) {
       return res
         .status(404)
         .json({ message: "No plate numbers found for this user" });
     }
 
-    // Extract plate numbers into an array
     const plateNumbers = plates.map((plate) => plate.plateNumber);
+    let allSummonses = [];
+    let actionCode, responseCode, responseMessage;
 
-    // Build the SOAP request XML
-    const builder = new Builder();
-    const soapRequestJson = {
-      "s:Envelope": {
-        $: {
-          "xmlns:s": "http://schemas.xmlsoap.org/soap/envelope/",
-          "xmlns:a": "http://schemas.xmlsoap.org/ws/2004/08/addressing",
-        },
-        "s:Header": {
-          RequestCode: "REQ_11",
-          AgencyID: agencyId,
-          AgencyKey: agencyKey,
-        },
-        "s:Body": {
-          Request: {
-            OffenderIDNo: null,
-            VehicleRegistrationNumbers: {
-              VehicleRegistrationNumber: plateNumbers,
+    for (const plateNumber of plateNumbers) {
+      const builder = new Builder();
+      const soapRequestJson = {
+        "s:Envelope": {
+          $: {
+            "xmlns:s": "http://schemas.xmlsoap.org/soap/envelope/",
+            "xmlns:a": "http://schemas.xmlsoap.org/ws/2004/08/addressing",
+          },
+          "s:Header": {
+            RequestCode: "REQ_11",
+            AgencyID: agencyId,
+            AgencyKey: agencyKey,
+          },
+          "s:Body": {
+            Request: {
+              OffenderIDNo: null,
+              VehicleRegistrationNumbers: {
+                VehicleRegistrationNumber: plateNumber,
+              },
+              NoticeNo: null,
             },
-            NoticeNo: null,
           },
         },
-      },
+      };
+
+      const soapRequest = builder.buildObject(soapRequestJson);
+      const response = await axios.post(process.env.COMPOUND_API, soapRequest, {
+        headers: {
+          "Content-Type": "text/xml",
+          SOAPAction: soapHeader,
+        },
+      });
+
+      await xml2js
+        .parseStringPromise(response.data, { explicitArray: false })
+        .then((result) => {
+          const envelope = result["s:Envelope"];
+          const body = envelope["s:Body"];
+          const responseContent = body?.Response;
+
+          if (!responseContent) {
+            return;
+          }
+
+          // Set actionCode, responseCode, and responseMessage from the first response
+          if (!actionCode && !responseCode && !responseMessage) {
+            actionCode = responseContent.ActionCode || null;
+            responseCode = responseContent.ResponseCode || null;
+            responseMessage = responseContent.ResponseMessage || null;
+          }
+
+          let summonses = responseContent.Summonses?.Summons || [];
+          if (!Array.isArray(summonses)) {
+            summonses = [summonses];
+          }
+
+          allSummonses = [
+            ...allSummonses,
+            ...summonses.map((summons) => ({
+              noticeNo: summons.NoticeNo || null,
+              vehicleRegistrationNo: summons.VehicleRegistrationNo || null,
+              offenceAct: summons.OffenceAct || null,
+              offenceSection: summons.OffenceSection || null,
+              offenceDescription: summons.OffenceDescription || null,
+              offenceLocation: summons.OffenceLocation || null,
+              offenceDate: summons.OffenceDate || null,
+              noticeStatus: summons.NoticeStatus || null,
+              amount: summons.Amount || null,
+            })),
+          ];
+        })
+        .catch((err) => {
+          console.error(
+            `Error parsing response for plate ${plateNumber}:`,
+            err,
+          );
+        });
+    }
+
+    if (allSummonses.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No summonses found for this user" });
+    }
+
+    const jsonResponse = {
+      success: true,
+      actionCode: actionCode || null,
+      responseCode: responseCode || null,
+      responseMessage: responseMessage || null,
+      summonses: allSummonses,
     };
 
-    const soapRequest = builder.buildObject(soapRequestJson);
-    const soapHeader = process.env.COMPOUND_SOAP;
-
-    // Send SOAP request to the service using axios
-    const response = await axios.post(process.env.COMPOUND_API, soapRequest, {
-      headers: {
-        "Content-Type": "text/xml",
-        SOAPAction: soapHeader,
-      },
-    });
-
-    // Parse the SOAP XML response to JSON
-    xml2js.parseString(
-      response.data,
-      { explicitArray: false },
-      (err, result) => {
-        if (err) {
-          return res.status(500).json({
-            message: "Error parsing XML response",
-            error: err.message,
-          });
-        }
-
-        // Extract relevant data from the parsed JSON
-        const envelope = result["s:Envelope"];
-        const body = envelope["s:Body"];
-        const responseContent = body?.Response;
-
-        // If there's no response data
-        if (!responseContent) {
-          return res
-            .status(404)
-            .json({ message: "No data found in the response" });
-        }
-
-        // Extract the Summonses information
-        let summonses = responseContent.Summonses?.Summons || [];
-
-        // Check if summonses is an object and convert it to an array
-        if (!Array.isArray(summonses)) {
-          summonses = [summonses];
-        }
-
-        // Build JSON response to return
-        const jsonResponse = {
-          actionCode: responseContent.ActionCode || null,
-          responseCode: responseContent.ResponseCode || null,
-          responseMessage: responseContent.ResponseMessage || null,
-          summonses: summonses.map((summons) => ({
-            noticeNo: summons.NoticeNo || null,
-            vehicleRegistrationNo: summons.VehicleRegistrationNo || null,
-            offenceAct: summons.OffenceAct || null,
-            offenceSection: summons.OffenceSection || null,
-            offenceDescription: summons.OffenceDescription || null,
-            offenceLocation: summons.OffenceLocation || null,
-            offenceDate: summons.OffenceDate || null,
-            noticeStatus: summons.NoticeStatus || null,
-            amount: summons.Amount || null,
-          })),
-        };
-
-        // Return the response in JSON format
-        return res.status(200).json({ success: true, data: jsonResponse });
-      },
-    );
+    return res.status(200).json(jsonResponse);
   } catch (error) {
     console.error("Error during SOAP request:", error);
     return res
@@ -159,109 +163,109 @@ compoundRouter.post("/display", async (req, res) => {
   }
 });
 
-compoundRouter.post("/search", async (req, res) => {
-  const { OffenderIDNo, VehicleRegistrationNumber, NoticeNo } = req.body;
+// compoundRouter.post("/search", async (req, res) => {
+//   const { OffenderIDNo, VehicleRegistrationNumber, NoticeNo } = req.body;
 
-  const agencyId = process.env.COMPOUND_AGENCY_ID;
-  const agencyKey = process.env.COMPOUND_AGENCY_KEY;
+//   const agencyId = process.env.COMPOUND_AGENCY_ID;
+//   const agencyKey = process.env.COMPOUND_AGENCY_KEY;
 
-  // Build the SOAP request XML from the JSON input using xml2js.Builder
-  const builder = new Builder();
-  const soapRequestJson = {
-    "s:Envelope": {
-      $: {
-        "xmlns:s": "http://schemas.xmlsoap.org/soap/envelope/",
-        "xmlns:a": "http://schemas.xmlsoap.org/ws/2004/08/addressing",
-      },
-      "s:Header": {
-        RequestCode: "REQ_11",
-        AgencyID: agencyId,
-        AgencyKey: agencyKey,
-      },
-      "s:Body": {
-        Request: {
-          OffenderIDNo: OffenderIDNo, // Static value
-          VehicleRegistrationNumber: VehicleRegistrationNumber,
-          NoticeNo: NoticeNo,
-        },
-      },
-    },
-  };
+//   // Build the SOAP request XML from the JSON input using xml2js.Builder
+//   const builder = new Builder();
+//   const soapRequestJson = {
+//     "s:Envelope": {
+//       $: {
+//         "xmlns:s": "http://schemas.xmlsoap.org/soap/envelope/",
+//         "xmlns:a": "http://schemas.xmlsoap.org/ws/2004/08/addressing",
+//       },
+//       "s:Header": {
+//         RequestCode: "REQ_11",
+//         AgencyID: agencyId,
+//         AgencyKey: agencyKey,
+//       },
+//       "s:Body": {
+//         Request: {
+//           OffenderIDNo: OffenderIDNo, // Static value
+//           VehicleRegistrationNumber: VehicleRegistrationNumber,
+//           NoticeNo: NoticeNo,
+//         },
+//       },
+//     },
+//   };
 
-  const soapRequest = builder.buildObject(soapRequestJson);
+//   const soapRequest = builder.buildObject(soapRequestJson);
 
-  const soapHeader = process.env.COMPOUND_SOAP;
+//   const soapHeader = process.env.COMPOUND_SOAP;
 
-  try {
-    // Send SOAP request to the service using axios
-    const response = await axios.post(process.env.COMPOUND_API, soapRequest, {
-      headers: {
-        "Content-Type": "text/xml",
-        SOAPAction: soapHeader,
-      },
-    });
+//   try {
+//     // Send SOAP request to the service using axios
+//     const response = await axios.post(process.env.COMPOUND_API, soapRequest, {
+//       headers: {
+//         "Content-Type": "text/xml",
+//         SOAPAction: soapHeader,
+//       },
+//     });
 
-    // Parse the SOAP XML response to JSON
-    xml2js.parseString(
-      response.data,
-      { explicitArray: false },
-      (err, result) => {
-        if (err) {
-          return res.status(500).json({
-            message: "Error parsing XML response",
-            error: err.message,
-          });
-        }
+//     // Parse the SOAP XML response to JSON
+//     xml2js.parseString(
+//       response.data,
+//       { explicitArray: false },
+//       (err, result) => {
+//         if (err) {
+//           return res.status(500).json({
+//             message: "Error parsing XML response",
+//             error: err.message,
+//           });
+//         }
 
-        // Extract relevant data from the parsed JSON
-        const envelope = result["s:Envelope"];
-        const body = envelope["s:Body"];
-        const responseContent = body?.Response;
+//         // Extract relevant data from the parsed JSON
+//         const envelope = result["s:Envelope"];
+//         const body = envelope["s:Body"];
+//         const responseContent = body?.Response;
 
-        // If there's no response data
-        if (!responseContent) {
-          return res
-            .status(404)
-            .json({ message: "No data found in the response" });
-        }
+//         // If there's no response data
+//         if (!responseContent) {
+//           return res
+//             .status(404)
+//             .json({ message: "No data found in the response" });
+//         }
 
-        // Extract the Summonses information
-        let summonses = responseContent.Summonses?.Summons || [];
+//         // Extract the Summonses information
+//         let summonses = responseContent.Summonses?.Summons || [];
 
-        // Check if summonses is an object and convert it to an array
-        if (!Array.isArray(summonses)) {
-          summonses = [summonses];
-        }
+//         // Check if summonses is an object and convert it to an array
+//         if (!Array.isArray(summonses)) {
+//           summonses = [summonses];
+//         }
 
-        // Build JSON response to return
-        const jsonResponse = {
-          actionCode: responseContent.ActionCode || null,
-          responseCode: responseContent.ResponseCode || null,
-          responseMessage: responseContent.ResponseMessage || null,
-          summonses: summonses.map((summons) => ({
-            noticeNo: summons.NoticeNo || null,
-            vehicleRegistrationNo: summons.VehicleRegistrationNo || null,
-            offenceAct: summons.OffenceAct || null,
-            offenceSection: summons.OffenceSection || null,
-            offenceDescription: summons.OffenceDescription || null,
-            offenceLocation: summons.OffenceLocation || null,
-            offenceDate: summons.OffenceDate || null,
-            noticeStatus: summons.NoticeStatus || null,
-            amount: summons.Amount || null,
-          })),
-        };
+//         // Build JSON response to return
+//         const jsonResponse = {
+//           actionCode: responseContent.ActionCode || null,
+//           responseCode: responseContent.ResponseCode || null,
+//           responseMessage: responseContent.ResponseMessage || null,
+//           summonses: summonses.map((summons) => ({
+//             noticeNo: summons.NoticeNo || null,
+//             vehicleRegistrationNo: summons.VehicleRegistrationNo || null,
+//             offenceAct: summons.OffenceAct || null,
+//             offenceSection: summons.OffenceSection || null,
+//             offenceDescription: summons.OffenceDescription || null,
+//             offenceLocation: summons.OffenceLocation || null,
+//             offenceDate: summons.OffenceDate || null,
+//             noticeStatus: summons.NoticeStatus || null,
+//             amount: summons.Amount || null,
+//           })),
+//         };
 
-        // Return the response in JSON format
-        return res.status(200).json({ success: true, data: jsonResponse });
-      },
-    );
-  } catch (error) {
-    console.error("Error during SOAP request:", error);
-    return res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
-  }
-});
+//         // Return the response in JSON format
+//         return res.status(200).json({ success: true, data: jsonResponse });
+//       },
+//     );
+//   } catch (error) {
+//     console.error("Error during SOAP request:", error);
+//     return res
+//       .status(500)
+//       .json({ message: "Internal server error", error: error.message });
+//   }
+// });
 
 compoundRouter.post("/payCompound", async (req, res) => {
   const {
