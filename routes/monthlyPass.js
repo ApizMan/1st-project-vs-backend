@@ -209,6 +209,18 @@ monthlyPassRouter
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
+  })
+  .get("/all/promotion", async (req, res) => {
+    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
+    try {
+      const promotionHistory = await client.promotionHistory.findMany({
+        where: { userId },
+      });
+      res.status(200).json(promotionHistory);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
   });
 
 // .put("/edit/:id", async (req, res) => {
