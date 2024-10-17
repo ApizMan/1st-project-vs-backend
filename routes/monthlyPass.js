@@ -171,7 +171,41 @@ monthlyPassRouter
         },
       });
 
-      res.status(201).json({ status: "success", data: newMonthlyPass });
+      // Fetch the current timeUse for the user and promotion
+      let currentPromotionHistory = await client.promotionHistory.findFirst({
+        where: {
+          userId: userId,
+          promotionId: promotionId,
+        },
+      });
+
+      // If there is no history, set the initial value, otherwise increment timeUse
+      if (!currentPromotionHistory) {
+        currentPromotionHistory = await client.promotionHistory.create({
+          data: {
+            id,
+            userId,
+            promotionId,
+            timeUse: 1, // Initial time use
+          },
+        });
+      } else {
+        // Increment the existing timeUse
+        await client.promotionHistory.update({
+          where: {
+            id: currentPromotionHistory.id,
+          },
+          data: {
+            timeUse: currentPromotionHistory.timeUse + 1, // Increment time use by 1
+          },
+        });
+      }
+
+      res.status(201).json({
+        status: "success",
+        data: newMonthlyPass,
+        history: currentPromotionHistory,
+      });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
