@@ -171,55 +171,9 @@ monthlyPassRouter
         },
       });
 
-      // Fetch the current timeUse for the user and promotion
-      let currentPromotionHistory = await client.promotionHistory.findFirst({
-        where: {
-          userId: userId,
-          promotionId: promotionId,
-        },
-      });
-
-      // If there is no history, set the initial value, otherwise increment timeUse
-      if (!currentPromotionHistory) {
-        currentPromotionHistory = await client.promotionHistory.create({
-          data: {
-            id,
-            userId,
-            promotionId,
-            timeUse: 1, // Initial time use
-          },
-        });
-      } else {
-        // Increment the existing timeUse
-        await client.promotionHistory.update({
-          where: {
-            id: currentPromotionHistory.id,
-          },
-          data: {
-            timeUse: currentPromotionHistory.timeUse + 1, // Increment time use by 1
-          },
-        });
-      }
-
-      res.status(201).json({
-        status: "success",
-        data: newMonthlyPass,
-        history: currentPromotionHistory,
-      });
+      res.status(201).json({ status: "success", data: newMonthlyPass });
     } catch (error) {
       res.status(400).json({ error: error.message });
-    }
-  })
-  .get("/all/promotion", async (req, res) => {
-    const userId = req.user.userId; // Assuming this is obtained via authentication middleware
-    try {
-      const promotionHistory = await client.promotionHistory.findMany({
-        where: { userId },
-      });
-      res.status(200).json(promotionHistory);
-    } catch (error) {
-      logger.error(error);
-      return res.status(500).send(error);
     }
   });
 
