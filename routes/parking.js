@@ -30,7 +30,7 @@ parkingRouter
   })
   .put("/edit/:id", async (req, res) => {
     const { id } = req.params;
-    const { userId, plateNumber, pbt, location } = req.body; // Data to update
+    const { userId, plateNumber, expiredAt, pbt, location } = req.body; // Data to update
 
     try {
       // Check if the parking exists and belongs to the user
@@ -52,6 +52,7 @@ parkingRouter
           plateNumber: plateNumber || existingParking.plateNumber,
           pbt: pbt || existingParking.pbt,
           location: location || existingParking.location,
+          expiredAt: expiredAt || existingParking.expiredAt,
         },
       });
 
@@ -105,7 +106,8 @@ parkingRouter
   })
   .post("/create", async (req, res) => {
     const userId = req.user.userId; // Assuming this is obtained via authentication middleware
-    const { walletTransactionId, plateNumber, pbt, location } = req.body; // Destructure relevant data from req.body
+    const { walletTransactionId, plateNumber, expiredAt, pbt, location } =
+      req.body; // Destructure relevant data from req.body
     const id = uuidv4(); // Generate unique ID
 
     try {
@@ -116,6 +118,7 @@ parkingRouter
           plateNumber,
           pbt,
           location,
+          expiredAt,
           // Connect existing user
           user: {
             connect: { id: userId }, // Use userId to connect the user
