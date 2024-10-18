@@ -240,7 +240,9 @@ reservebayRouter
             reserveBayId: existingReserveBay.id,
           },
         });
-      } else if (existingReserveBay.status === "REJECTED") {
+      }
+
+      if (existingReserveBay.status === "REJECTED") {
         // give CCP App notification
         notification = await client.notification.create({
           data: {
