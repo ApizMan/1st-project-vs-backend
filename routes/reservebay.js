@@ -260,9 +260,9 @@ reservebayRouter
             title: "Reserve Bay",
             notifyTime: new Date(now()),
             description:
-              "Your Reserve Bay" +
+              "Your Reserve Bay for " +
               existingReserveBay.companyRegistration +
-              "status has been rejected.",
+              " status has been rejected.",
             userId: existingReserveBay.userId,
             reserveBayId: existingReserveBay.id,
           },
