@@ -73,7 +73,7 @@ notificationRouter
       const updatedNotification = await client.notification.update({
         where: { id },
         data: {
-          status: statusRead || existingNotification.statusRead,
+          statusRead: statusRead || existingNotification.statusRead,
         },
       });
 
