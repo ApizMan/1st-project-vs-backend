@@ -240,14 +240,17 @@ reservebayRouter
             reserveBayId: existingReserveBay.id,
           },
         });
-      } else {
+      } else if (existingReserveBay.status === "REJECTED") {
         // give CCP App notification
         notification = await client.notification.create({
           data: {
             id: uuidv4(),
             title: "Reserve Bay",
             notifyTime: new Date(now()),
-            description: "Your Reserve Bay status has been rejected.",
+            description:
+              "Your Reserve Bay" +
+              existingReserveBay.companyRegistration +
+              "status has been rejected.",
             userId: existingReserveBay.userId,
             reserveBayId: existingReserveBay.id,
           },
