@@ -231,7 +231,10 @@ reservebayRouter
           data: {
             id: uuidv4(),
             title: "Reserve Bay",
-            description: "Your Reserve Bay status has been approved.",
+            description:
+              "Your Reserve Bay for " +
+              existingReserveBay.companyRegistration +
+              " status has been approved.",
             notifyTime: new Date(now()),
             userId: existingReserveBay.userId,
             reserveBayId: existingReserveBay.id,
