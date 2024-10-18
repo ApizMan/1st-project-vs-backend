@@ -45,33 +45,34 @@ model PlateNumber {
 }
 
 model ReserveBay {
-  id                    String   @id @unique(map: "id")
-  userId                String   @map("user_id")
-  companyName           String?  @map("company_name")
-  companyRegistration   String?  @map("company_registration")
-  businessType          String?  @map("business_type")
+  id                    String         @id @unique(map: "id")
+  userId                String         @map("user_id")
+  companyName           String?        @map("company_name")
+  companyRegistration   String?        @map("company_registration")
+  businessType          String?        @map("business_type")
   address1              String?
   address2              String?
   address3              String?
   postcode              String?
   city                  String?
   state                 String?
-  picFirstName          String?  @map("person_in_charge_first_name")
-  picLastName           String?  @map("person_in_charge_last_name")
+  picFirstName          String?        @map("person_in_charge_first_name")
+  picLastName           String?        @map("person_in_charge_last_name")
   phoneNumber           String?
   email                 String?
-  idNumber              String?  @map("id_number")
-  totalLotRequired      Int?     @map("total_lot_required")
+  idNumber              String?        @map("id_number")
+  totalLotRequired      Int?           @map("total_lot_required")
   reason                String?
-  lotNumber             String?  @map("lot_number")
+  lotNumber             String?        @map("lot_number")
   location              String?
   designatedBayPicture  String?
   registerNumberPicture String?
   idCardPicture         String?
-  status                String   @default("PENDING")
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @default(now()) @map("updated_at")
-  user                  User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status                String         @default("PENDING")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @default(now()) @map("updated_at")
+  user                  User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Notification          Notification[]
 
   @@index([userId], map: "user_id")
   @@map("reserve_bay")
@@ -132,6 +133,7 @@ model User {
   Parking          Parking[]
   Compound         Compound[]
   PromotionHistory PromotionHistory[]
+  Notification     Notification[]
 
   @@map("user")
 }
@@ -186,7 +188,8 @@ model MonthlyPass {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user         User           @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Notification Notification[]
 
   @@index([userId], map: "user_id")
   @@map("monthly_pass")
@@ -206,6 +209,7 @@ model Parking {
 
   user              User              @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   walletTransaction WalletTransaction @relation(fields: [walletTransactionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Notification      Notification[]
 
   @@index([userId], map: "user_id")
   @@map("parking")
@@ -267,4 +271,26 @@ model Compound {
   updatedAt DateTime @default(now()) @map("updated_at")
 
   @@map("compound")
+}
+
+model Notification {
+  id            String   @id @unique(map: "id")
+  userId        String   @map("user_id")
+  title         String   @default("No Title")
+  description   String?
+  notifyTime    DateTime @default(now())
+  statusRead    Int      @default(0)
+  parkingId     String?  @map("parking_id")
+  reserveBayId  String?  @map("reserve_bay_id")
+  monthlyPassId String?  @map("monthly_pass_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @default(now()) @map("updated_at")
+  parking     Parking?     @relation(fields: [parkingId], references: [id])
+  reserveBay  ReserveBay?  @relation(fields: [reserveBayId], references: [id])
+  monthlyPass MonthlyPass? @relation(fields: [monthlyPassId], references: [id])
+
+  @@map("notification")
 }

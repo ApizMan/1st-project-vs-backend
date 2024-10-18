@@ -19,6 +19,7 @@ import monthlyPassRoute from "./routes/monthlyPass.js";
 import forgetPasswordRouter from "./routes/forgetPassword.js";
 import parkingRouter from "./routes/parking.js";
 import promotionRouter from "./routes/promotionsMonthlyPass.js";
+import notificationRouter from "./routes/notification.js";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -48,6 +49,7 @@ app.use("/monthlyPass", monthlyPassRoute);
 app.use("/forgot-password", forgetPasswordRouter);
 app.use("/parking", parkingRouter);
 app.use("/promotion", promotionRouter);
+app.use("/notification", notificationRouter);
 
 const startupTime = new Date();
 

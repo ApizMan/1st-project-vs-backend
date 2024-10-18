@@ -3,6 +3,7 @@ import { tokenMiddleware } from "../utils/authUtils.js";
 import { v4 as uuidv4 } from "uuid";
 import client from "../utils/db.js";
 import logger from "../utils/logger.js";
+import { now } from "sequelize/lib/utils";
 
 const reservebayRouter = express.Router();
 
@@ -222,7 +223,39 @@ reservebayRouter
         },
       });
 
-      res.status(200).json({ status: "success", data: updatedReserveBay });
+      let notification;
+
+      if (existingReserveBay.status === "APPROVED") {
+        // give CCP App notification
+        notification = await client.notification.create({
+          data: {
+            id: uuidv4(),
+            title: "Reserve Bay",
+            description: "Your Reserve Bay status has been approved.",
+            notifyTime: new Date(now()),
+            userId: existingReserveBay.userId,
+            reserveBayId: existingReserveBay.id,
+          },
+        });
+      } else {
+        // give CCP App notification
+        notification = await client.notification.create({
+          data: {
+            id: uuidv4(),
+            title: "Reserve Bay",
+            notifyTime: new Date(now()),
+            description: "Your Reserve Bay status has been rejected.",
+            userId: existingReserveBay.userId,
+            reserveBayId: existingReserveBay.id,
+          },
+        });
+      }
+
+      res.status(200).json({
+        status: "success",
+        data: updatedReserveBay,
+        notification: notification,
+      });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
