@@ -225,7 +225,17 @@ reservebayRouter
 
       let notification;
 
-      if (existingReserveBay.status === "APPROVED") {
+      const reserveBay = await client.reserveBay.findUnique({
+        where: { id },
+      });
+
+      if (!reserveBay) {
+        return res.status(404).json({
+          error: "Reserve Bay not found.",
+        });
+      }
+
+      if (reserveBay.status === "APPROVED") {
         // give CCP App notification
         notification = await client.notification.create({
           data: {
@@ -242,7 +252,7 @@ reservebayRouter
         });
       }
 
-      if (existingReserveBay.status === "REJECTED") {
+      if (reserveBay.status === "REJECTED") {
         // give CCP App notification
         notification = await client.notification.create({
           data: {
