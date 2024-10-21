@@ -62,15 +62,29 @@ plateNumberRouter
   })
   .put("/update/:id", async (req, res) => {
     const id = req.params.id;
-    const { plateNumber, isMain } = req.body;
+    const { isMain } = req.body;
+    const userId = req.user.userId;
     try {
+      // First, reset all other plates to isMain: false
+      if (isMain) {
+        await client.plateNumber.updateMany({
+          where: {
+            userId,
+            isMain: true,
+          },
+          data: {
+            isMain: false,
+          },
+        });
+      }
+
+      // Now set the selected plate to isMain: true
       await client.plateNumber.update({
         where: {
           id,
-          userId: req.user.userId,
+          userId,
         },
         data: {
-          plateNumber,
           isMain,
         },
       });
