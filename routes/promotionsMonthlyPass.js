@@ -32,6 +32,7 @@ promotionRouter
     const {
       title,
       description,
+      type,
       rate,
       timeUse,
       date,
@@ -48,7 +49,7 @@ promotionRouter
           id,
           title: title,
           description: description,
-          type: "MonthlyPass",
+          type: type,
           rate: rate,
           timeUse: timeUse,
           date: date,
