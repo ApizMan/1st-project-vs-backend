@@ -236,14 +236,14 @@ model Promotion {
 model PromotionHistory {
   id          String @id @unique(map: "id")
   userId      String @map("user_id")
-  promotionId String @map("promotion_id")
+  promotionId String? @map("promotion_id")
   frequency     Int    @default(0)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
   user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion Promotion? @relation(fields: [promotionId], references: [id])
 
   @@map("promotion_history")
 }

@@ -383,45 +383,6 @@ paymentfpxRouter.post("/recordBill-compound", async (req, res) => {
     req.accessToken = response.data.access_token;
     req.refreshToken = response.data.refresh_token;
 
-    // Get walletId from the Wallet model using userId
-    const wallet = await client.wallet.findUnique({
-      where: { userId: req.user.userId },
-    });
-
-    // Access the 'SFM' constant
-    const sfmConstant = response.data.SFM.Constant;
-
-    if (sfmConstant === "SFM_EXECUTE_PAYMENT_SUCCESS") {
-      if (wallet) {
-        // Create a WalletTransaction
-        const walletTransaction = await client.walletTransaction.create({
-          data: {
-            id: uuidv4(),
-            walletId: wallet.id, // Use the walletId from the found wallet
-            type: "Monthly Pass",
-            amount: parseFloat(NetAmount),
-            status: "completed",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        });
-
-        console.log("WalletTransaction created:", walletTransaction);
-
-        // Update the Wallet amount
-        const updatedWallet = await client.wallet.update({
-          where: { id: wallet.id },
-          data: {
-            amount: { increment: parseFloat(NetAmount) },
-          },
-        });
-
-        console.log("Wallet updated:", updatedWallet);
-      } else {
-        console.error("Wallet not found for user:", req.user.userId);
-      }
-    }
-
     res.status(200).json(response.data);
   } catch (error) {
     console.error(

@@ -3,6 +3,7 @@ import { tokenMiddleware } from "../utils/authUtils.js";
 import logger from "../utils/logger.js";
 import { v4 as uuidv4 } from "uuid";
 import client from "../utils/db.js";
+import { now } from "sequelize/lib/utils";
 
 const monthlyPassRouter = express.Router();
 
@@ -200,6 +201,20 @@ monthlyPassRouter
           },
         });
       }
+
+      let notify = await client.notification.create({
+        data: {
+          id: uuidv4(),
+          title: "Monthly Pass",
+          description:
+            "Your Monthly Pass of RM " +
+            parseFloat(amount) +
+            " successfully been paid.",
+          notifyTime: new Date(now()),
+          userId: userId,
+          monthlyPassId: newMonthlyPass.id,
+        },
+      });
 
       res.status(201).json({
         status: "success",
