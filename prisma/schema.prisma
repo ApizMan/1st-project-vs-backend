@@ -220,7 +220,7 @@ model Promotion {
   title       String    @default("No Title")
   description String?
   type        String?
-  timeUse     Int       @default(0)
+  frequency     Int?
   rate        Decimal   @default(0)
   date        DateTime  @default(now())
   expiredDate DateTime?
@@ -237,7 +237,7 @@ model PromotionHistory {
   id          String @id @unique(map: "id")
   userId      String @map("user_id")
   promotionId String @map("promotion_id")
-  timeUse     Int    @default(0)
+  frequency     Int    @default(0)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")

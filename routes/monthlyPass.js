@@ -186,7 +186,7 @@ monthlyPassRouter
             id,
             userId,
             promotionId,
-            timeUse: 1, // Initial time use
+            frequency: 1, // Initial time use
           },
         });
       } else {
@@ -196,7 +196,7 @@ monthlyPassRouter
             id: currentPromotionHistory.id,
           },
           data: {
-            timeUse: currentPromotionHistory.timeUse + 1, // Increment time use by 1
+            frequency: currentPromotionHistory.frequency + 1, // Increment time use by 1
           },
         });
       }
