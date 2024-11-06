@@ -20,6 +20,7 @@ import forgetPasswordRouter from "./routes/forgetPassword.js";
 import parkingRouter from "./routes/parking.js";
 import promotionRouter from "./routes/promotionsMonthlyPass.js";
 import notificationRouter from "./routes/notification.js";
+import axios from "axios";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -52,6 +53,61 @@ app.use("/promotion", promotionRouter);
 app.use("/notification", notificationRouter);
 
 const startupTime = new Date();
+
+// Set an interval to refresh the token every 10 minutes
+let accessToken;
+
+// Function to refresh token
+const refreshToken = async () => {
+  try {
+    // Fetch the most recent token from the database
+    const token = await client.token.findFirst({
+      where: {
+        type: "QR Pegepay",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!token) {
+      console.error("No tokens found");
+      return;
+    }
+
+    // Use the current token
+    accessToken = token.accessToken;
+
+    // Send a request to refresh the token
+    const refreshResponse = await axios.post(
+      `${process.env.BASE_URL}:${process.env.PORT}/payment/public/refresh-token`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (refreshResponse.status === 200) {
+      console.log("Token refreshed successfully:", refreshResponse.data);
+
+      // Update the access token for future requests
+      accessToken = refreshResponse.data.access_token;
+    } else {
+      console.error("Failed to refresh token:", refreshResponse.data);
+    }
+  } catch (error) {
+    console.error(
+      "Refresh Token Fetch Error:",
+      error.response ? error.response.data : error.message,
+    );
+  }
+};
+
+// Set an interval to refresh the token every 10 minutes
+const refreshInterval = 10 * 60 * 1000; // 10 minutes in milliseconds
+setInterval(refreshToken, refreshInterval);
 
 app.get("/health", async (_req, res) => {
   try {
