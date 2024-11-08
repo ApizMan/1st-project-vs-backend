@@ -420,7 +420,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
 
   const qr_body = {
     order_output: "image",
-    order_no: `CCP${generateRandomId()}`,
+    order_no: `1234567`,
     override_existing_unprocessed_order_no: "NO",
     order_amount: order_amount,
     qr_validity: "99999", //store in env
