@@ -427,7 +427,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
     store_id: store_id,
     terminal_id: terminal_id,
     shift_id: shift_id,
-    to_whatsapp_no: to_whatsapp_no || "+916369333237", //store in env
+    to_whatsapp_no: to_whatsapp_no, //store in env
     language: "en_us",
     whatsapp_template_id: "payment_qr",
     parameters: [
