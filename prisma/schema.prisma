@@ -178,6 +178,7 @@ model Token {
 model MonthlyPass {
   id          String  @id @unique(map: "id")
   userId      String  @map("user_id")
+  noReceipt   String  @default("No Number Receipt")
   plateNumber String  @default("No Plate Number") @map("plate_number")
   pbt         String  @default("No PBT") @map("pbt")
   location    String  @default("No Location")
@@ -221,7 +222,7 @@ model Promotion {
   title       String    @default("No Title")
   description String?
   type        String?
-  frequency     Int?
+  frequency   Int?
   rate        Decimal   @default(0)
   date        DateTime  @default(now())
   expiredDate DateTime?
@@ -235,15 +236,15 @@ model Promotion {
 }
 
 model PromotionHistory {
-  id          String @id @unique(map: "id")
-  userId      String @map("user_id")
+  id          String  @id @unique(map: "id")
+  userId      String  @map("user_id")
   promotionId String? @map("promotion_id")
-  frequency     Int    @default(0)
+  frequency   Int     @default(0)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User       @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   promotion Promotion? @relation(fields: [promotionId], references: [id])
 
   @@map("promotion_history")
