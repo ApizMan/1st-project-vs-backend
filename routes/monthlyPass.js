@@ -33,6 +33,7 @@ monthlyPassRouter
     const {
       userId,
       promotionId,
+      noReceipt,
       plateNumber,
       pbt,
       amount,
@@ -49,6 +50,7 @@ monthlyPassRouter
           id,
           userId: userId,
           promotionId: promotionId ?? null,
+          noReceipt: noReceipt,
           plateNumber: plateNumber,
           pbt: pbt,
           location: location,
