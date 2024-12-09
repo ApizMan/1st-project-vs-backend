@@ -407,8 +407,14 @@ paymentRouter.post("/transaction-details", async (req, res) => {
 });
 
 paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
-  const { order_amount, store_id, terminal_id, shift_id, to_whatsapp_no } =
-    req.body;
+  const {
+    order_output,
+    order_amount,
+    store_id,
+    terminal_id,
+    shift_id,
+    to_whatsapp_no,
+  } = req.body;
   console.log("Request Body:", req.body);
 
   let { accessToken } = req; // Current access token
@@ -419,7 +425,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
   }
 
   const qr_body = {
-    order_output: "image",
+    order_output: order_output,
     order_no: `CCP${generateRandomId()}`,
     override_existing_unprocessed_order_no: "NO",
     order_amount: order_amount,
