@@ -409,6 +409,7 @@ paymentRouter.post("/transaction-details", async (req, res) => {
 paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
   const {
     order_output,
+    validity_qr,
     order_amount,
     store_id,
     terminal_id,
@@ -429,7 +430,7 @@ paymentRouter.post("/generate-qr", storeTokens, async (req, res) => {
     order_no: `CCP${generateRandomId()}`,
     override_existing_unprocessed_order_no: "NO",
     order_amount: order_amount,
-    qr_validity: "10", //store in env
+    qr_validity: validity_qr, //store in env
     store_id: store_id,
     terminal_id: terminal_id,
     shift_id: shift_id,
