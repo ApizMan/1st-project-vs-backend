@@ -159,6 +159,22 @@ paymentRouter
       console.error("Database error:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
+  })
+  .get("/public/token", async (res) => {
+    try {
+      const token = await client.token.findFirst({
+        where: {
+          type: "QR Pegepay",
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      res.status(200).json(token.data);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
   });
 
 paymentRouter.use(tokenMiddleware);
