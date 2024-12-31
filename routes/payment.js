@@ -172,7 +172,7 @@ paymentRouter
       });
       res.status(200).json({
         accessToken: token.accessToken,
-        expiresIn: token.expiresIn,
+        token_expired_at: token.expiresIn,
       });
     } catch (error) {
       logger.error(error);
