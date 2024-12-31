@@ -160,7 +160,7 @@ paymentRouter
       return res.status(500).json({ error: "Internal server error" });
     }
   })
-  .get("/public/token", async (res) => {
+  .get("/public/token", async (req, res) => {
     try {
       const token = await client.token.findFirst({
         where: {
