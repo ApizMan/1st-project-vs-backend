@@ -170,7 +170,10 @@ paymentRouter
           createdAt: "desc",
         },
       });
-      res.status(200).json(token.data);
+      res.status(200).json({
+        accessToken: token.accessToken,
+        expiresIn: token.expiresIn,
+      });
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error);
