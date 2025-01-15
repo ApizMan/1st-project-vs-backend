@@ -11,18 +11,9 @@ const compoundRouter = express.Router();
 compoundRouter
   .get("/public", async (req, res) => {
     try {
-      const compound = await client.compound.findMany({
-        include: {
-          user: true, // Include user relation
-        },
-      });
+      const compound = await client.compound.findMany();
 
-      // Filter out records where the user is soft-deleted
-      const filteredCompound = compound.filter(
-        (com) => com.user && !com.user.isDeleted,
-      );
-
-      res.status(200).json(filteredCompound);
+      res.status(200).json(compound);
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error);
@@ -33,21 +24,7 @@ compoundRouter
     try {
       const singleCompound = await client.compound.findUnique({
         where: { id },
-        include: {
-          user: true, // Include user relation
-        },
       });
-
-      // Check if the related user is soft-deleted
-      if (
-        !singleCompound ||
-        (singleCompound.user && singleCompound.user.isDeleted)
-      ) {
-        return res.status(404).json({
-          status: "error",
-          message: `Compound with ID ${id} not found or the user is soft-deleted.`,
-        });
-      }
 
       res.status(200).json(singleCompound);
     } catch (error) {

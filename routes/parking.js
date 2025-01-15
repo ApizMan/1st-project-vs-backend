@@ -9,18 +9,9 @@ const parkingRouter = express.Router();
 parkingRouter
   .get("/public", async (req, res) => {
     try {
-      const allParking = await client.parking.findMany({
-        include: {
-          user: true, // Include user relation
-        },
-      });
+      const allParking = await client.parking.findMany();
 
-      // Filter out records where the user is soft-deleted
-      const filteredParking = allParking.filter(
-        (pass) => pass.user && !pass.user.isDeleted,
-      );
-
-      res.status(200).json(filteredParking);
+      res.status(200).json(allParking);
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error);
@@ -31,21 +22,7 @@ parkingRouter
     try {
       const singleParking = await client.parking.findUnique({
         where: { id },
-        include: {
-          user: true, // Include user relation
-        },
       });
-
-      // Check if the related user is soft-deleted
-      if (
-        !singleParking ||
-        (singleParking.user && singleParking.user.isDeleted)
-      ) {
-        return res.status(404).json({
-          status: "error",
-          message: `Parking with ID ${id} not found or the user is soft-deleted.`,
-        });
-      }
 
       res.status(200).json(singleParking);
     } catch (error) {
