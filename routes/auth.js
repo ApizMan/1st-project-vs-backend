@@ -98,63 +98,87 @@ authRouter
   })
   .post("/signup", async (req, res) => {
     try {
-      const { password, email } = req.body;
+      const { password, email, ...otherFields } = req.body;
       const userId = uuidv4();
+
+      // Check if the user with the same email exists
       const existing = await client.user.findFirst({
         where: { email },
-        select: false,
       });
 
       if (existing) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
+        if (!existing.isDeleted) {
+          return res.status(400).json({ error: "Email already exists" });
+        }
 
-      let body;
-      const hashed = hashPassword(password);
-
-      if (hashed) {
-        body = {
-          ...req.body,
-          password: hashed,
-          id: userId,
-        };
-      }
-
-      try {
-        await client.$transaction(async (prisma) => {
-          const newSignup = await prisma.user.create({
-            data: {
-              id: userId,
-              password: hashed,
-              ...body,
-            },
-          });
-
-          if (newSignup) {
-            await prisma.wallet.create({
+        // Reactivate the soft-deleted user
+        try {
+          await client.$transaction(async (prisma) => {
+            const updatedUser = await prisma.user.update({
+              where: { id: existing.id },
               data: {
-                id: uuidv4(),
-                userId: newSignup.id,
-                amount: 0,
+                isDeleted: false,
+                password: hashPassword(password),
+                ...otherFields,
               },
             });
 
             const token = generateToken({
-              email: req.body.email,
-              userId: newSignup.id,
+              email: updatedUser.email,
+              userId: updatedUser.id,
             });
 
-            res.status(201).json({
-              message: "User registered successfully",
+            res.status(200).json({
+              message: "User reactivated successfully",
               token,
             });
-          }
+          });
+          return;
+        } catch (error) {
+          logger.error(error);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+      }
+
+      // If no existing user, proceed with new registration
+      const hashedPassword = hashPassword(password);
+
+      try {
+        await client.$transaction(async (prisma) => {
+          const newUser = await prisma.user.create({
+            data: {
+              id: userId,
+              email,
+              password: hashedPassword,
+              ...otherFields,
+            },
+          });
+
+          // Create a wallet for the new user
+          await prisma.wallet.create({
+            data: {
+              id: uuidv4(),
+              userId: newUser.id,
+              amount: 0,
+            },
+          });
+
+          const token = generateToken({
+            email: newUser.email,
+            userId: newUser.id,
+          });
+
+          res.status(201).json({
+            message: "User registered successfully",
+            token,
+          });
         });
       } catch (error) {
         logger.error(error);
         res.status(500).json({ error: "Internal server error" });
       }
     } catch (error) {
+      logger.error(error);
       res.status(400).json({ error: error.message });
     }
   })
@@ -167,7 +191,7 @@ authRouter
 
     try {
       const user = await client.user.findFirst({
-        where: { email },
+        where: { email, isDeleted: false },
         select: { id: true, email: true, password: true },
       });
 
