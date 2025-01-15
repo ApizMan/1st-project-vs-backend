@@ -10,8 +10,18 @@ const monthlyPassRouter = express.Router();
 monthlyPassRouter
   .get("/public", async (req, res) => {
     try {
-      const monthlyPass = await client.monthlyPass.findMany();
-      res.status(200).json(monthlyPass);
+      const monthlyPass = await client.monthlyPass.findMany({
+        include: {
+          user: true, // Include user relation
+        },
+      });
+
+      // Filter out records where the user is soft-deleted
+      const filteredMonthlyPasses = monthlyPass.filter(
+        (pass) => pass.user && !pass.user.isDeleted,
+      );
+
+      res.status(200).json(filteredMonthlyPasses);
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error);
@@ -22,7 +32,22 @@ monthlyPassRouter
     try {
       const singleMonthlyPass = await client.monthlyPass.findUnique({
         where: { id },
+        include: {
+          user: true, // Include user relation
+        },
       });
+
+      // Check if the related user is soft-deleted
+      if (
+        !singleMonthlyPass ||
+        (singleMonthlyPass.user && singleMonthlyPass.user.isDeleted)
+      ) {
+        return res.status(404).json({
+          status: "error",
+          message: `MonthlyPass with ID ${id} not found or the user is soft-deleted.`,
+        });
+      }
+
       res.status(200).json(singleMonthlyPass);
     } catch (error) {
       logger.error(error);

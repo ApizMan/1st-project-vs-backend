@@ -11,15 +11,44 @@ import client from "../utils/db.js";
 
 const authRouter = express.Router();
 
-authRouter.get("/users", async (req, res) => {
-  try {
-    const users = await client.user.findMany();
-    res.status(200).json(users);
-  } catch (error) {
-    logger.error(error);
-    return res.status(500).send(error);
-  }
-});
+authRouter
+  .get("/users", async (req, res) => {
+    try {
+      const users = await client.user.findMany({
+        where: { isDeleted: false },
+      });
+
+      res.status(200).json(users);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error);
+    }
+  })
+  .patch("/restore/:id", async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      const user = await client.user.findUnique({ where: { id } });
+
+      if (!user || !user.isDeleted) {
+        return res.status(404).json({
+          error: "User not found or not deleted.",
+        });
+      }
+
+      await client.user.update({
+        where: { id },
+        data: { isDeleted: false },
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: "User successfully restored.",
+      });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
 
 authRouter.use(tokenMiddleware);
 
@@ -185,6 +214,35 @@ authRouter
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error);
+    }
+  })
+  .delete("/delete/:id", async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      // Check if the user exists
+      const existingUser = await client.user.findUnique({
+        where: { id },
+      });
+
+      if (!existingUser || existingUser.isDeleted) {
+        return res.status(404).json({
+          error: "User not found.",
+        });
+      }
+
+      // Mark the user as deleted
+      await client.user.update({
+        where: { id },
+        data: { isDeleted: true },
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: "User successfully deleted.",
+      });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
   });
 

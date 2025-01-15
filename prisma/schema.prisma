@@ -123,6 +123,7 @@ model User {
   otp              String? // To store OTP
   otpExpiresAt     DateTime? // To store OTP expiration time
   wallet           Wallet?
+  isDeleted        Boolean            @default(false) // Field for soft delete
   createdAt        DateTime           @default(now()) @map("created_at")
   updatedAt        DateTime           @default(now()) @map("updated_at")
   helpdesks        Helpdesk[]

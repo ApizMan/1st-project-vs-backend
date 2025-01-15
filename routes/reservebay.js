@@ -10,8 +10,18 @@ const reservebayRouter = express.Router();
 reservebayRouter
   .get("/public", async (req, res) => {
     try {
-      const reserveBays = await client.reserveBay.findMany();
-      res.status(200).json(reserveBays);
+      const reserveBays = await client.reserveBay.findMany({
+        include: {
+          user: true,
+        },
+      });
+
+      // Filter out records where the user is soft-deleted
+      const filteredReserveBay = reserveBays.filter(
+        (pass) => pass.user && !pass.user.isDeleted,
+      );
+
+      res.status(200).json(filteredReserveBay);
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error);
@@ -22,7 +32,22 @@ reservebayRouter
     try {
       const singleReserveBay = await client.reserveBay.findUnique({
         where: { id },
+        include: {
+          user: true, // Include user relation
+        },
       });
+
+      // Check if the related user is soft-deleted
+      if (
+        !singleReserveBay ||
+        (singleReserveBay.user && singleReserveBay.user.isDeleted)
+      ) {
+        return res.status(404).json({
+          status: "error",
+          message: `Reserve Bay with ID ${id} not found or the user is soft-deleted.`,
+        });
+      }
+
       res.status(200).json(singleReserveBay);
     } catch (error) {
       logger.error(error);
