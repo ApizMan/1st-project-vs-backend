@@ -236,7 +236,7 @@ paymentfpxRouter.post("/recordBill-seasonpass", async (req, res) => {
     AppReleaseId: 34,
     GMTTimeDifference: 8,
     PaymentTypeId: 6608,
-    BillReference: `ParkingTokenBill${generateRandomId()}`,
+    BillReference: `SeasonPassBill${generateRandomId()}`,
     BatchName: null,
     NetAmount: NetAmount,
     BillAttributes: [
@@ -338,7 +338,7 @@ paymentfpxRouter.post("/recordBill-compound", async (req, res) => {
     AppReleaseId: 34,
     GMTTimeDifference: 8,
     PaymentTypeId: 6610,
-    BillReference: `ParkingTokenBill${generateRandomId()}`,
+    BillReference: `CompoundBill${generateRandomId()}`,
     BatchName: null,
     NetAmount: NetAmount,
     BillAttributes: [
@@ -440,7 +440,7 @@ paymentfpxRouter.post("/recordBill-reservebay", async (req, res) => {
     AppReleaseId: 34,
     GMTTimeDifference: 8,
     PaymentTypeId: 6609,
-    BillReference: `ParkingTokenBill${generateRandomId()}`,
+    BillReference: `ReserveBayBill${generateRandomId()}`,
     BatchName: null,
     NetAmount: NetAmount,
     BillAttributes: [
